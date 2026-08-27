@@ -1,0 +1,3049 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pengurusan Alamanda </title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        
+        :root {
+            --primary: #0f4c75;
+            --primary-light: #1b6ca8;
+            --accent: #00b4d8;
+            --accent2: #48cae4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f0f7ff;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2eaf4;
+            --shadow: 0 4px 24px rgba(15,76,117,0.10);
+            --shadow-lg: 0 8px 40px rgba(15,76,117,0.16);
+            --radius: 18px;
+            --radius-sm: 10px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+        .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18; animation: float 14s ease-in-out infinite; }
+        .orb-1 { width: 520px; height: 520px; background: var(--accent); top: -120px; right: -80px; animation-delay: 0s; }
+        .orb-2 { width: 380px; height: 380px; background: var(--primary); bottom: 60px; left: -80px; animation-delay: -5s; }
+        .orb-3 { width: 280px; height: 280px; background: #90e0ef; top: 40%; left: 40%; animation-delay: -9s; }
+        @keyframes float { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(30px,-30px) scale(1.05); } 66% { transform: translate(-20px,20px) scale(0.97); } }
+        header { position: relative; z-index: 10; background: rgba(255,255,255,0.85); backdrop-filter: blur(18px); border-bottom: 1.5px solid var(--border); padding: 0 32px; box-shadow: 0 2px 16px rgba(15,76,117,0.08); }
+        .logo-header-top { display: flex; align-items: center; justify-content: center; padding: 18px 0 14px; }
+        .logo-center-top { height: 72px; width: auto; border-radius: 20px; box-shadow: 0 4px 20px rgba(15,76,117,0.18); transition: transform 0.3s; }
+        .logo-center-top:hover { transform: scale(1.04); }
+        .header-title { text-align: center; padding-bottom: 16px; }
+        .header-title h1 { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
+        .header-title p { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+        .header-nav { display: flex; justify-content: center; gap: 6px; padding-bottom: 16px; flex-wrap: wrap; }
+        .nav-btn { padding: 9px 20px; border-radius: 30px; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 600; transition: all 0.25s; display: flex; align-items: center; gap: 7px; background: var(--bg); color: var(--text-muted); }
+        .nav-btn:hover { background: var(--primary); color: white; transform: translateY(-1px); }
+        .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 14px rgba(15,76,117,0.3); }
+        main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 32px 20px 60px; }
+        .page { display: none; animation: fadeUp 0.4s ease; }
+        .page.active { display: block; }
+        @keyframes fadeUp { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
+        .scan-dashboard { display: grid; grid-template-columns: 280px 1fr 280px; gap: 24px; align-items: start; }
+        @media (max-width: 1000px) { .scan-dashboard { grid-template-columns: 1fr; } }
+        .dashboard-card { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1.5px solid var(--border); }
+        .dashboard-card h3 { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
+        .leaderboard-list, .batch-list { list-style: none; }
+        .leaderboard-list li, .batch-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .leaderboard-rank { font-weight: 700; color: var(--primary); width: 28px; }
+        .leaderboard-name { flex: 1; font-weight: 500; }
+        .leaderboard-points { font-weight: 700; color: var(--warning); }
+        .batch-count { font-weight: 600; color: var(--primary); }
+        .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; border: 1.5px solid var(--border); transition: box-shadow 0.3s; }
+        .card:hover { box-shadow: var(--shadow-lg); }
+        .card-title { font-size: 1.05rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: var(--accent); font-size: 1.1rem; }
+        .scan-hero { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 60%, var(--accent) 100%); border-radius: var(--radius); padding: 40px 32px; text-align: center; color: white; position: relative; overflow: hidden; margin-bottom: 24px; }
+        .scan-hero::before { content:''; position:absolute; inset:0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        .nfc-icon-wrap { width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; animation: pulse-ring 2s ease-in-out infinite; }
+        @keyframes pulse-ring { 0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3), 0 0 0 0 rgba(255,255,255,0.1); } 50% { box-shadow: 0 0 0 16px rgba(255,255,255,0.1), 0 0 0 32px rgba(255,255,255,0.04); } }
+        .nfc-icon-wrap i { font-size: 2.6rem; color: white; }
+        .scan-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+        .scan-hero p { opacity: 0.85; font-size: 0.9rem; }
+        .nfc-input-group { display: flex; gap: 12px; margin-top: 24px; max-width: 480px; margin-left: auto; margin-right: auto; }
+        .nfc-input { flex: 1; padding: 14px 20px; border-radius: 30px; border: none; font-size: 1rem; font-family: 'Plus Jakarta Sans', sans-serif; background: rgba(255,255,255,0.2); color: white; outline: none; backdrop-filter: blur(10px); }
+        .nfc-input::placeholder { color: rgba(255,255,255,0.6); }
+        .nfc-input:focus { background: rgba(255,255,255,0.3); }
+        .scan-btn { padding: 14px 24px; border-radius: 30px; border: none; background: white; color: var(--primary); font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
+        .scan-btn:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+        .scan-btn:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+        .scan-result { padding: 20px 24px; border-radius: var(--radius-sm); animation: slideIn 0.4s ease; display: none; border-left: 4px solid; margin-bottom: 24px; }
+        .scan-result.show { display: block; }
+        .scan-result.success { background: #f0fdf4; border-color: var(--success); }
+        .scan-result.error { background: #fef2f2; border-color: var(--danger); }
+        .scan-result.warning { background: #fffbeb; border-color: var(--warning); }
+        @keyframes slideIn { from { opacity:0; transform: translateX(-12px); } to { opacity:1; transform: translateX(0); } }
+        .result-name { font-weight: 800; font-size: 1.1rem; }
+        .result-msg { font-size: 0.9rem; margin-top: 6px; color: var(--text-muted); }
+        .result-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 8px; }
+        .badge-selesai { background: #d1fae5; color: #065f46; }
+        .badge-awal { background: #fee2e2; color: #991b1b; }
+        .badge-checkin { background: #dbeafe; color: #1d4ed8; }
+        .session-grid { display: grid; gap: 12px; }
+        .session-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: var(--radius-sm); background: var(--bg); border: 1.5px solid var(--border); transition: all 0.2s; }
+        .session-item:hover { border-color: var(--accent); }
+        .session-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+        .av-bertugas { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; }
+        .av-ahli { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; }
+        .session-info { flex: 1; min-width: 0; }
+        .session-name { font-weight: 700; font-size: 0.95rem; }
+        .session-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+        .session-status { text-align: right; font-size: 0.8rem; font-weight: 600; }
+        .dot-live { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: blink 1.4s infinite; margin-right: 4px; }
+        @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+        .status-pill { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .pill-green { background: #d1fae5; color: #065f46; }
+        .pill-red { background: #fee2e2; color: #991b1b; }
+        .pill-blue { background: #dbeafe; color: #1d4ed8; }
+        .pill-yellow { background: #fef9c3; color: #854d0e; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media(max-width:600px){ .form-grid { grid-template-columns: 1fr; } }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: 1/-1; }
+        label { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
+        input, select, textarea { padding: 12px 16px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); background: white; }
+        .btn { padding: 12px 28px; border-radius: 30px; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.9rem; transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(15,76,117,0.25); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { opacity: 0.9; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-sm { padding: 7px 16px; font-size: 0.8rem; border-radius: 20px; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+        .btn-outline:hover { background: var(--primary); color: white; }
+        .table-wrap { overflow-x: auto; border-radius: var(--radius-sm); }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: var(--primary); color: white; padding: 13px 16px; text-align: left; font-size: 0.82rem; font-weight: 600; }
+        thead th:first-child { border-radius: 10px 0 0 0; }
+        thead th:last-child { border-radius: 0 10px 0 0; }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:nth-child(even) { background: #f8fbff; }
+        tbody tr:hover { background: #e8f4fd; }
+        td { padding: 12px 16px; font-size: 0.87rem; border-bottom: 1px solid var(--border); }
+        .admin-login-wrap { max-width: 400px; margin: 40px auto; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media(max-width:700px){ .admin-grid { grid-template-columns: 1fr; } }
+        .stat-card { padding: 20px 24px; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; text-align: center; }
+        .stat-card.green { background: linear-gradient(135deg, #059669, #10b981); }
+        .stat-card.orange { background: linear-gradient(135deg, #d97706, #f59e0b); }
+        .stat-card.red { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .stat-num { font-size: 2.2rem; font-weight: 800; }
+        .stat-label { font-size: 0.82rem; opacity: 0.85; margin-top: 4px; }
+        .pts-display { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.9rem; }
+        .pts-display .star { color: var(--warning); }
+        .pts-rm { font-size: 0.75rem; color: var(--text-muted); font-weight: 400; }
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(15,20,40,0.55); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: white; border-radius: var(--radius); padding: 32px; max-width: 500px; width: 100%; box-shadow: var(--shadow-lg); animation: modalIn 0.3s ease; }
+        @keyframes modalIn { from { opacity:0; transform: scale(0.93) translateY(16px); } to { opacity:1; transform: scale(1) translateY(0); } }
+        .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { padding: 8px 18px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted); cursor: pointer; font-weight: 600; font-size: 0.83rem; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s; }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
+        .empty-state p { font-size: 0.9rem; }
+        #toast { position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast-item { padding: 14px 20px; border-radius: var(--radius-sm); background: white; box-shadow: var(--shadow-lg); font-size: 0.88rem; font-weight: 600; border-left: 4px solid var(--success); animation: toastIn 0.35s ease; max-width: 320px; }
+        .toast-item.error { border-color: var(--danger); }
+        .toast-item.warning { border-color: var(--warning); }
+        @keyframes toastIn { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+        .role-chip { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+        .chip-guru { background: #dbeafe; color: #1d4ed8; }
+        .chip-pelajar { background: #f0fdf4; color: #166534; }
+        .chip-akp { background: #fdf4ff; color: #7e22ce; }
+        .chip-ahli { background: #fff7ed; color: #c2410c; }
+        .divider { border: none; border-top: 1.5px solid var(--border); margin: 20px 0; }
+        @media(max-width:480px){ .nfc-input-group { flex-direction: column; } .scan-btn { border-radius: 12px; } }
+
+        /* ===== QUEUE STYLES (prefixed q-) ===== */
+        .queque-app { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+        .q-top-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .q-app-title { font-size: 22px; font-weight: 800; color: var(--text); }
+        .q-app-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .q-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        @media(max-width:640px){ .q-two-col { grid-template-columns: 1fr; } }
+        .q-card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+        .q-card-head { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem; border-bottom: 0.5px solid var(--border); }
+        .q-card-head-left { display: flex; align-items: center; gap: 10px; }
+        .q-stage-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .q-dot-blue { background: #378ADD; }
+        .q-dot-green { background: #3B6D11; }
+        .q-card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+        .q-card-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+        .q-count-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; background: var(--bg); border: 0.5px solid var(--border); color: var(--text-muted); }
+        .q-active-display { padding: 1.25rem; background: linear-gradient(135deg, #185FA5, #0C447C); position: relative; overflow: hidden; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .q-active-display.q-green-display { background: linear-gradient(135deg, #3B6D11, #27500A); }
+        .q-pulse-ring { position: absolute; width: 180px; height: 180px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0.6); opacity: 0; pointer-events: none; }
+        .q-speaking .q-pulse-ring { animation: qPulse 1.4s ease-out infinite; }
+        .q-speaking .q-pulse-ring:nth-child(2) { animation-delay: .45s; }
+        .q-speaking .q-pulse-ring:nth-child(3) { animation-delay: .9s; }
+        @keyframes qPulse { 0% { transform: translate(-50%,-50%) scale(0.6); opacity: .6; } 100% { transform: translate(-50%,-50%) scale(1.6); opacity: 0; } }
+        .q-ad-label { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; opacity: .65; color: #fff; position: relative; }
+        .q-ad-name { font-size: 32px; font-weight: 800; color: #fff; position: relative; line-height: 1.1; margin: 4px 0; }
+        .q-ad-name.q-pop { animation: qPopIn .35s cubic-bezier(.34,1.56,.64,1) both; }
+        @keyframes qPopIn { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .q-ad-info { font-size: 12px; opacity: .65; color: #fff; position: relative; }
+        .q-pc-badge-display { display: inline-block; background: rgba(255,255,255,.2); border-radius: 99px; padding: 3px 12px; font-size: 12px; font-weight: 700; color: #fff; margin-top: 6px; position: relative; }
+        .q-btn-ghost { cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; border: 0.5px solid var(--border); border-radius: 8px; transition: background .15s, transform .1s; background: transparent; color: var(--text-muted); padding: 9px 14px; font-size: 12px; }
+        .q-btn-ghost:hover { color: var(--text); background: var(--bg); }
+        .q-btn-ghost:active { transform: scale(.97); }
+        .q-btn-sm { padding: 6px 12px; font-size: 12px; }
+        .q-btn-primary { cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; border: none; border-radius: 8px; transition: background .15s, transform .1s; background: #185FA5; color: #fff; padding: 11px 16px; font-size: 14px; }
+        .q-btn-primary:hover:not(:disabled) { background: #0C447C; }
+        .q-btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+        .q-btn-green { cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; border: none; border-radius: 8px; transition: background .15s, transform .1s; background: #3B6D11; color: #fff; padding: 11px 16px; font-size: 14px; }
+        .q-btn-green:hover:not(:disabled) { background: #27500A; }
+        .q-btn-green:disabled { opacity: .4; cursor: not-allowed; }
+        .q-ctrl-row { display: flex; gap: 8px; padding: 0.85rem 1.25rem; border-top: 0.5px solid var(--border); }
+        .q-ctrl-row button { flex: 1; }
+        .q-scroll { max-height: 240px; overflow-y: auto; }
+        .q-scroll::-webkit-scrollbar { width: 3px; }
+        .q-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+        .q-item { display: flex; align-items: center; gap: 10px; padding: 10px 1.25rem; border-bottom: 0.5px solid var(--border); animation: qSlideIn .2s ease both; }
+        .q-item:last-child { border-bottom: none; }
+        .q-item.q-done { opacity: .3; }
+        .q-item.q-active-row { background: #E6F1FB; }
+        .q-item.q-active-row.q-g { background: #EAF3DE; }
+        @keyframes qSlideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        .q-num { width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+        .q-num.q-cur { background: #185FA5; color: #fff; border-color: transparent; }
+        .q-num.q-gcur { background: #3B6D11; color: #fff; border-color: transparent; }
+        .q-name-wrap { flex: 1; }
+        .q-name { font-size: 13px; font-weight: 600; color: var(--text); }
+        .q-meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+        .q-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+        .q-b-cur { background: #E6F1FB; color: #185FA5; }
+        .q-b-gcur { background: #EAF3DE; color: #3B6D11; }
+        .q-b-done { background: #F1EFE8; color: #5F5E5A; }
+        .q-b-wait { background: #FAEEDA; color: #854F0B; }
+        .q-b-ready { background: #E1F5EE; color: #0F6E56; }
+        .q-del-btn { background: transparent; border: none; color: #aaa; font-size: 15px; padding: 2px 5px; border-radius: 4px; cursor: pointer; }
+        .q-del-btn:hover { color: #A32D2D; background: #FCEBEB; }
+        .q-empty-state { padding: 2rem; text-align: center; color: #aaa; font-size: 13px; }
+        .q-pc-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 1rem 1.25rem; }
+        .q-pc-card { border-radius: 14px; border: 0.5px solid var(--border); padding: .85rem .75rem; text-align: center; background: var(--bg); transition: background .2s, border .2s; }
+        .q-pc-card.q-busy { background: #E6F1FB; border-color: #378ADD; }
+        .q-pc-card.q-ready-pay { background: #EAF3DE; border-color: #3B6D11; }
+        .q-pc-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+        .q-pc-name { font-size: 13px; font-weight: 700; color: var(--text); min-height: 18px; }
+        .q-pc-status { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+        .q-pc-status.q-s-busy { color: #185FA5; }
+        .q-pc-status.q-s-ready { color: #3B6D11; font-weight: 600; }
+        .q-pc-btn-ready { margin-top: 8px; width: 100%; padding: 5px; font-size: 11px; background: #3B6D11; color: #fff; border-radius: 6px; border: none; cursor: pointer; font-family: inherit; font-weight: 600; }
+        .q-pc-btn-ready:hover { background: #27500A; }
+        .q-pc-empty { color: #aaa; font-size: 11px; }
+        .q-add-area { padding: 1rem 1.25rem; border-top: 0.5px solid var(--border); }
+        .q-add-label-sm { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+        .q-add-row { display: flex; gap: 8px; }
+        .q-add-row input[type=text] { flex: 1; padding: 9px 12px; border-radius: 8px; border: 0.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; }
+        .q-add-row input[type=text]:focus { box-shadow: 0 0 0 2px #B5D4F4; border-color: #378ADD; }
+        .q-btn-add { padding: 9px 16px; font-size: 13px; background: #185FA5; color: #fff; border-radius: 8px; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; }
+        .q-btn-add:hover { background: #0C447C; }
+        .q-log-bar { background: var(--card); border: 0.5px solid var(--border); border-radius: 14px; padding: .75rem 1.25rem; display: flex; align-items: center; gap: 10px; }
+        .q-log-dot { width: 8px; height: 8px; border-radius: 50%; background: #888780; flex-shrink: 0; transition: background .3s; }
+        .q-log-dot.q-active { background: #378ADD; animation: qBlink 1s infinite; }
+        @keyframes qBlink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+        .q-log-text { font-size: 13px; color: var(--text-muted); }
+        .q-prog-bar-bg { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+        .q-prog-fill { height: 100%; border-radius: 99px; background: #378ADD; transition: width .4s ease; }
+        .q-prog-fill.q-green { background: #3B6D11; }
+        .q-pay-alert { background: #EAF3DE; border: 1px solid #C0DD97; border-radius: 14px; padding: .85rem 1.25rem; display: none; align-items: center; gap: 12px; }
+        .q-pay-alert.q-show { display: flex; }
+        .q-pay-alert-icon { font-size: 20px; }
+        .q-pay-alert-text { flex: 1; font-size: 13px; color: #27500A; }
+        .q-pay-alert-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+<div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+<header>
+    <div class="logo-header-top">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYXBsE9u9o8BI7JNZ4TqTabaa0QxVMcd5W6g&s" alt="Logo VocKAF" class="logo-center-top">
+    </div>
+    <div class="header-title">
+        <h1><i class="fas fa-book-open"></i> Pusat Sumber Alamanda</h1>
+        <p>Sistem Pengurusan Alamanda</p>
+    </div>
+    <nav class="header-nav">
+        <button class="nav-btn active" onclick="showPage('scan')" id="nav-scan"><i class="fas fa-wifi"></i> Imbas NFC</button>
+        <button class="nav-btn" onclick="showPage('kehadiran')" id="nav-kehadiran"><i class="fas fa-clipboard-check"></i> Kehadiran</button>
+        <button class="nav-btn" onclick="showPage('queque')" id="nav-queque"><i class="fas fa-list-ol"></i> Sistem Queue</button>
+        <button class="nav-btn" onclick="showPage('daftar')" id="nav-daftar"><i class="fas fa-user-plus"></i> Daftar</button>
+        <button class="nav-btn" onclick="showPage('sesi')" id="nav-sesi"><i class="fas fa-clock"></i> Sesi Hari Ini</button>
+        <button class="nav-btn" onclick="showPage('ahli')" id="nav-ahli"><i class="fas fa-users"></i> Senarai Ahli</button>
+        <button class="nav-btn" onclick="openPaymentModal()" id="nav-payment"><i class="fas fa-money-bill-wave"></i> Pembayaran</button>
+        <button class="nav-btn" onclick="openTopupModal()" id="nav-topup"><i class="fas fa-plus-circle"></i> Tambah Nilai</button>
+        <button class="nav-btn" onclick="openLoanModal()" id="nav-loan"><i class="fas fa-book"></i> Pinjaman</button>
+        <button class="nav-btn" onclick="openReturnModal()" id="nav-return"><i class="fas fa-undo-alt"></i> Pemulangan</button>
+        <button class="nav-btn" onclick="showPage('admin')" id="nav-admin"><i class="fas fa-shield-halved"></i> Admin</button>
+    </nav>
+</header>
+<main>
+    <!-- IMBAS NFC -->
+    <div class="page active" id="page-scan">
+        <div class="scan-dashboard">
+            <div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-layer-group"></i> Kehadiran Batch (Bulan Ini)</h3>
+                    <ul id="batchActivityList" class="batch-list"><li>Loading...</li></ul>
+                    <div style="margin-top: 12px; font-size: 0.7rem; color: var(--text-muted); text-align: center;">batch dengan kekerapan tertinggi akan berada di atas</div>
+                </div>
+                <div class="dashboard-card" style="margin-top:16px">
+                    <h3><i class="fas fa-book-open"></i> Sedang Dipinjam <span id="activeLoanMonthLabel" style="font-size:0.72rem;font-weight:400;color:var(--text-muted)"></span></h3>
+                    <div id="activeLoansList"><div style="font-size:0.82rem;color:var(--text-muted)">Loading...</div></div>
+                </div>
+            </div>
+            <div>
+                <div class="scan-hero">
+                    <div class="nfc-icon-wrap"><i class="fas fa-wifi"></i></div>
+                    <h2>Imbas Kad NFC</h2>
+                    <p>Letakkan kad pada card reader untuk login/logout</p>
+                    <div class="nfc-input-group">
+                        <input type="text" class="nfc-input" id="nfcInput" placeholder="Scan atau taip manual..." autofocus autocomplete="off">
+                        <button class="scan-btn" id="scanBtn" onclick="doScan()"><i class="fas fa-bolt"></i> Imbas</button>
+                    </div>
+                </div>
+                <div id="scanResult" class="scan-result"></div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-circle-dot"></i> Sedang Berada Di Dalam
+                        <span id="liveCount" style="margin-left:auto;font-size:0.82rem;color:var(--text-muted);font-weight:400"></span>
+                    </div>
+                    <div id="liveSessions" class="session-grid"><div class="empty-state"><i class="fas fa-door-open"></i><p>Tiada sesi aktif</p></div></div>
+                </div>
+            </div>
+            <div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-trophy"></i> Leaderboard Point Tertinggi</h3>
+                    <ul id="leaderboardList" class="leaderboard-list"><li>Loading...</li></ul>
+                    <div style="margin-top: 12px; font-size: 0.7rem; color: var(--text-muted); text-align: center;">100 point = RM 1.00</div>
+                </div>
+                <div class="dashboard-card" style="margin-top:16px">
+                    <h3><i class="fas fa-book-reader"></i>Peminjam Paling Banyak<span id="topBorrowerMonthLabel" style="font-size:0.72rem;font-weight:400;color:var(--text-muted)"></span></h3>
+                    <div id="topBorrowersList"><div style="font-size:0.82rem;color:var(--text-muted)">Loading...</div></div>
+                    <div style="margin-top: 12px; font-size: 0.7rem; color: var(--text-muted); text-align: center;">jumlah pinjaman bulan ini</div>
+                </div>
+            </div>
+        </div>
+        <a href="https://wa.me/601169387861?text=Assalamualaikum%20En.%20Azhar,%20saya%20perlukan%20bantuan%20berkaitan%20sistem%20pengurusan" target="_blank" style="display: inline-block; margin-top: 20px;"><i class="fab fa-whatsapp"></i> Hubungi Sokongan Teknikal</a>
+        <p style="margin-top: 20px; text-align: center;">&copy; <span id="current-year"></span> VocKAF - Sistem Ahli & Bertugas. powered by <strong>AzharMazlanEtn</strong>.<br>Hak cipta terpelihara.</p>
+    </div>
+
+    <!-- QUEUE -->
+    <div class="page" id="page-queque">
+        <div class="queque-app">
+          <div class="q-top-bar">
+            <div>
+              <div class="q-app-title">Sistem Queue</div>
+              <div class="q-app-sub">— mengurus queue dalam Pusat Sumber Alamanda —</div>
+            </div>
+            <button class="q-btn-ghost" onclick="qResetAll()">↺ Reset Semua</button>
+          </div>
+          <div class="q-pay-alert" id="qPayAlert">
+            <div class="q-pay-alert-icon">💳</div>
+            <div class="q-pay-alert-text">
+              <strong id="qPayAlertName">—</strong>
+              Sedia untuk pembayaran — lihat Kaunter Pembayaran di bawah
+            </div>
+          </div>
+          <div class="q-card">
+            <div class="q-card-head">
+              <div class="q-card-head-left">
+                <div class="q-stage-dot" style="background:#888;"></div>
+                <div>
+                  <div class="q-card-title">Status PC</div>
+                  <div class="q-card-sub">Klik "Siap" apabila urusan selesai — akan dihantar masuk giliran bayar</div>
+                </div>
+              </div>
+            </div>
+            <div class="q-pc-grid" id="qPcGrid"></div>
+          </div>
+          <div class="q-two-col">
+            <div class="q-card">
+              <div class="q-card-head">
+                <div class="q-card-head-left">
+                  <div class="q-stage-dot q-dot-blue"></div>
+                  <div>
+                    <div class="q-card-title">Kaunter Urusan</div>
+                    <div class="q-card-sub">Panggil &amp; assign ke PC</div>
+                  </div>
+                </div>
+                <span class="q-count-badge" id="qUBadge">0 menunggu</span>
+              </div>
+              <div class="q-active-display" id="qUDisplay">
+                <div class="q-pulse-ring"></div><div class="q-pulse-ring"></div><div class="q-pulse-ring"></div>
+                <div class="q-ad-label">Giliran Sekarang</div>
+                <div class="q-ad-name" id="qUName">—</div>
+                <div class="q-ad-info" id="qUInfo">Tekan Panggil untuk mula</div>
+                <div class="q-pc-badge-display" id="qUPcBadge" style="display:none;">PC —</div>
+              </div>
+              <div style="padding:.75rem 1.25rem;border-bottom:0.5px solid rgba(0,0,0,0.09);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:12px;color:#6b6b6b;font-weight:500;">Assign ke:</span>
+                <button class="q-btn-ghost q-btn-sm" onclick="qAssignPC(1)" id="qPcBtn1">PC 1</button>
+                <button class="q-btn-ghost q-btn-sm" onclick="qAssignPC(2)" id="qPcBtn2">PC 2</button>
+                <button class="q-btn-ghost q-btn-sm" onclick="qAssignPC(3)" id="qPcBtn3">PC 3</button>
+                <button class="q-btn-ghost q-btn-sm" onclick="qAssignPC(4)" id="qPcBtn4">PC 4</button>
+              </div>
+              <div style="padding:.5rem 1.25rem;border-bottom:0.5px solid rgba(0,0,0,0.09);">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b6b6b;margin-bottom:5px;">
+                  <span>Kemajuan</span><span id="qUProg">0 / 0</span>
+                </div>
+                <div class="q-prog-bar-bg"><div class="q-prog-fill" id="qUFill" style="width:0%"></div></div>
+              </div>
+              <div class="q-scroll" id="qUList"></div>
+              <div class="q-ctrl-row">
+                <button class="q-btn-primary" id="qUNext" onclick="qCallUrusan()">▶ Panggil Seterusnya</button>
+                <button class="q-btn-ghost" id="qURepeat" onclick="qRepeatUrusan()" disabled>🔁</button>
+              </div>
+              <div class="q-add-area">
+                <div class="q-add-label-sm">Tambah Nama</div>
+                <div class="q-add-row">
+                  <input type="text" id="qUInput" placeholder="Nama pelanggan..." onkeydown="if(event.key==='Enter')qAddName()"/>
+                  <button class="q-btn-add" onclick="qAddName()">+ Tambah</button>
+                </div>
+              </div>
+            </div>
+            <div class="q-card">
+              <div class="q-card-head">
+                <div class="q-card-head-left">
+                  <div class="q-stage-dot q-dot-green"></div>
+                  <div>
+                    <div class="q-card-title">Kaunter Pembayaran</div>
+                    <div class="q-card-sub">Panggil setelah urusan selesai</div>
+                  </div>
+                </div>
+                <span class="q-count-badge" id="qPBadge">0 menunggu</span>
+              </div>
+              <div class="q-active-display q-green-display" id="qPDisplay">
+                <div class="q-pulse-ring"></div><div class="q-pulse-ring"></div><div class="q-pulse-ring"></div>
+                <div class="q-ad-label">Sila Ke Kaunter Bayar</div>
+                <div class="q-ad-name" id="qPName">—</div>
+                <div class="q-ad-info" id="qPInfo">Tiada panggilan lagi</div>
+              </div>
+              <div style="padding:.5rem 1.25rem;border-bottom:0.5px solid rgba(0,0,0,0.09);">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b6b6b;margin-bottom:5px;">
+                  <span>Kemajuan</span><span id="qPProg">0 / 0</span>
+                </div>
+                <div class="q-prog-bar-bg"><div class="q-prog-fill q-green" id="qPFill" style="width:0%"></div></div>
+              </div>
+              <div class="q-scroll" id="qPList"></div>
+              <div class="q-ctrl-row">
+                <button class="q-btn-green" id="qPNext" onclick="qCallPayment()">▶ Panggil Untuk Bayar</button>
+                <button class="q-btn-ghost" id="qPRepeat" onclick="qRepeatPayment()" disabled>🔁</button>
+              </div>
+            </div>
+          </div>
+          <div class="q-log-bar">
+            <div class="q-log-dot" id="qLogDot"></div>
+            <div class="q-log-text" id="qLogText">Sistem sedia. Tambah nama dan mula panggil.</div>
+          </div>
+        </div>
+    </div>
+
+    <!-- DAFTAR -->
+    <div class="page" id="page-daftar">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-user-plus"></i> Daftar Ahli / Bertugas Baru</div>
+            <div class="form-grid">
+                <div class="form-group"><label>ID Kad NFC</label><input type="text" id="regNfc" placeholder="Imbas atau taip ID kad..."></div>
+                <div class="form-group"><label>No. IC (pilihan)</label><input type="text" id="regIc" placeholder="cth: xxxxxx-xx-xxxx"></div>
+                <div class="form-group"><label>Nama Penuh</label><input type="text" id="regName" placeholder="Nama penuh..."></div>
+                <div class="form-group"><label>Kategori</label><select id="regCategory" onchange="toggleRoleAndExpiry()"><option value="">-- Pilih Kategori --</option><option value="bertugas">Bertugas (Pengawas Pusat Sumber)</option><option value="ahli">Ahli (Pengumpul Point)</option></select></div>
+                <div class="form-group" id="roleGroup" style="display:none"><label>Peranan</label><select id="regRole" onchange="toggleKelasInput()"><option value="">-- Pilih Peranan --</option><option value="guru">Guru</option><option value="pelajar">Pelajar</option><option value="AKP">AKP</option></select></div>
+                <div class="form-group" id="kelasGroup" style="display:none"><label>Kelas (untuk Pelajar)</label><input type="text" id="regKelas" placeholder="cth: 5 Bestari"><small>Hanya isi jika peranan = Pelajar</small></div>
+                <div class="form-group" id="initialPointsGroup" style="display:none"><label>Point Permulaan (Ahli sahaja)</label><input type="number" id="regInitialPoints" value="0" min="0" step="1"><small>100 point = RM 1.00</small></div>
+                <div class="form-group" id="expiryGroup" style="display:none"><label>Tarikh Tamat (pilihan)</label><input type="date" id="regExpiry"><small>Biarkan kosong jika tiada had tamat</small></div>
+                <div class="form-group" id="batchGroup" style="display:none"><label>Nombor Batch (cth: 06)</label><input type="text" id="regBatch" placeholder="Contoh: 06"></div>
+            </div>
+            <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" onclick="registerMember()"><i class="fas fa-plus-circle"></i> Daftar Sekarang</button><button class="btn btn-success" onclick="openBulkRegisterModal()"><i class="fas fa-file-upload"></i> Daftar Sekaligus</button><button class="btn btn-warning" onclick="openAssignNfcModal()"><i class="fas fa-id-card"></i> Setkan Sebagai Ahli</button><button class="btn btn-primary" onclick="showPage('updateahli')" style="background:linear-gradient(135deg,#7c3aed,#a855f7)"><i class="fas fa-user-edit"></i> Update Ahli</button></div>
+            <hr class="divider">
+            <div style="background:#f0f9ff;border-radius:12px;padding:16px 20px;font-size:0.84rem;color:var(--text-muted);line-height:1.8">
+                <b style="color:var(--primary)"><i class="fas fa-info-circle"></i> Maklumat Sistem:</b><br>
+                • <b>Bertugas</b>: Guru, Pelajar, AKP yang bertugas di Pusat Sumber.<br>
+                <b>SILA TETAPKAN</b>:
+                <br>• BATCH BAGI GURU -1-.<br>
+                • BATCH BAGI AKP      -2-.<br>
+                • BATCH BAGI sekaligus(guru/akp) -3-.<br>
+                • <b>Ahli</b>: Murid biasa yang mengumpul point. 100 point = RM 1.00.<br>
+                • Point permulaan boleh ditetapkan semasa daftar.<br>
+                • Auto-logout: pagi->1ptg, 12-4ptg->5ptg, 5ptg->12mlm.<br>
+                • Jika pinjaman dibuat dengan mengunakan ic,jangan daftar ahli selagi belum pulang buku.
+            </div>
+        </div>
+    </div>
+
+    <!-- UPDATE AHLI (BULK CLASS UPDATE) -->
+    <div class="page" id="page-updateahli">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-user-edit"></i> Update Ahli — Kemaskini Kelas sekaligus/individu</div></i> nombor depan ic ialah penentu batch</div>
+            <div class="form-grid">
+                <div class="form-group"><label>Nombor Batch</label><input type="text" id="upBatch" placeholder="cth: 06"></div>
+                <div class="form-group"><label>Filter Course</label>
+                    <select id="upCourse">
+                        <option value="">-- Semua Course --</option>
+                        <option value="ETN">ETN</option>
+                        <option value="ETE">ETE</option>
+                        <option value="MTK">MTK</option>
+                        <option value="MTA">MTA</option>
+                        <option value="BAK">BAK</option>
+                        <option value="BKP">BKP</option>
+                        <option value="PPU">PPU</option>
+                        <option value="MPI">MPI</option>
+                        <option value="CTP">CTP</option>
+                        <option value="GURU">GURU</option>
+                        <option value="AKP">AKP</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Kelas Baru</label><input type="text" id="upNewKelas" placeholder="cth: 2 DVM ETN"></div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-primary" onclick="loadBulkMembersByBatch()"><i class="fas fa-search"></i> Papar Ahli</button>
+                <button class="btn btn-success" onclick="bulkUpdateKelas()"><i class="fas fa-save"></i> Kemaskini</button>
+                <button class="btn btn-outline" onclick="showPage('daftar')"><i class="fas fa-arrow-left"></i> Kembali</button>
+            </div>
+            <hr class="divider">
+            <div id="upMembersInfo" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px"></div>
+            <div class="table-wrap">
+                <table><thead><tr><th>Bil</th><th>Nama</th><th>No. IC</th><th>Kelas/status Sekarang</th><th>Batch</th><th>Kategori/Cara pendaftaran</th><th>Tindakan</th></tr></thead>
+                <tbody id="upMembersBody"><tr><td colspan="7" class="empty-state">Masukkan batch dan tekan "Papar Ahli"</td></tr></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <!-- KEHADIRAN IC/BULK -->
+    <div class="page" id="page-kehadiran">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-clipboard-check"></i> KEHADIRAN.(JANGAN UBAH PAGE*LETAK IC DAN TERUS TEKAN ENTER*)</div>
+            <div style="background:#f0f9ff;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:0.85rem;color:var(--text-muted)">
+                <i class="fas fa-info-circle"></i> SILA GUNAKAN IC ANDA.
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>No. IC</label><input type="text" id="bulkAttIc" placeholder="Masukkan No. IC..." onkeydown="if(event.key==='Enter') bulkAttendanceCheckin()" autocomplete="off"></div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-primary" onclick="bulkAttendanceCheckin()"><i class="fas fa-check-circle"></i> Rekod Kehadiran</button>
+                <button class="btn btn-outline" onclick="loadBulkAttendanceList()"><i class="fas fa-rotate"></i> Muat Semula</button>
+            </div>
+            <div id="bulkAttResult" style="margin-top:14px"></div>
+            <hr class="divider">
+            <div class="card-title" style="font-size:1rem"><i class="fas fa-list"></i> Senarai Kehadiran Hari Ini</div>
+            <div class="table-wrap">
+                <table><thead><tr><th>Nama</th><th>No. IC</th><th>Kelas</th><th>Tarikh</th><th>Masa</th></tr></thead>
+                <tbody id="bulkAttBody"><tr><td colspan="5" class="empty-state">Tiada rekod hari ini</td></tr></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SESI HARI INI -->
+    <div class="page" id="page-sesi">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-calendar-day"></i> Sesi Kehadiran Hari Ini
+                <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="loadTodaySessions()"><i class="fas fa-rotate"></i> Muat Semula</button>
+            </div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="filterSessions('semua')">Semua</button>
+                <button class="tab-btn" onclick="filterSessions('bertugas')">Bertugas</button>
+                <button class="tab-btn" onclick="filterSessions('ahli')">Ahli</button>
+                <button class="tab-btn" onclick="filterSessions('aktif')">Aktif</button>
+            </div>
+            <div class="table-wrap">
+                <table id="sessionsTable"><thead><tr><th>Nama</th><th>Kategori</th><th>Waktu Masuk</th><th>Waktu Keluar</th><th>Tempoh</th><th>Status / Point</th></tr></thead><tbody id="sessionsBody"><tr><td colspan="6" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Memuatkan...</td></tr></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SENARAI AHLI -->
+    <div class="page" id="page-ahli">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-users"></i> Senarai Ahli & Bertugas
+                <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="loadMembers()"><i class="fas fa-rotate"></i> Muat Semula</button>
+            </div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="filterMembers('semua')">Semua</button>
+                <button class="tab-btn" onclick="filterMembers('ahli')">Ahli</button>
+                <button class="tab-btn" onclick="filterMembers('bertugas')">Bertugas</button>
+            </div>
+            <div class="table-wrap">
+                <table><thead><tr><th>Nama</th><th>NFC ID</th><th>No. IC</th><th>Kategori</th><th>Point / Status</th><th>Tarikh Daftar</th><th>Tarikh Tamat</th><th>Baki Tempoh</th><th>Batch</th><th>Tindakan</th></tr></thead><tbody id="membersBody"><tr><td colspan="9" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Memuatkan...</td></tr></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN (fixed) -->
+    <div class="page" id="page-admin">
+        <div id="adminLogin" class="admin-login-wrap">
+            <div class="card"><div class="card-title"><i class="fas fa-lock"></i> Log Masuk Admin</div>
+                <div class="form-group"><label>Kata Laluan Admin</label><input type="password" id="adminPass" onkeydown="if(event.key==='Enter') adminLogin()"></div>
+                <div style="margin-top:16px"><button class="btn btn-primary" onclick="adminLogin()"><i class="fas fa-sign-in-alt"></i> Log Masuk</button></div>
+            </div>
+        </div>
+        <div id="adminPanel" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+                <h2 style="font-size:1.2rem;font-weight:800;color:var(--primary)"><i class="fas fa-shield-halved"></i> Panel Admin</h2>
+                <button class="btn btn-danger btn-sm" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Log Keluar</button>
+            </div>
+            <div class="admin-grid" style="margin-bottom:20px">
+                <div class="stat-card"><div class="stat-num" id="statAhli">—</div><div class="stat-label">Jumlah Ahli</div></div>
+                <div class="stat-card green"><div class="stat-num" id="statBertugas">—</div><div class="stat-label">Jumlah Petugas</div></div>
+                <div class="stat-card orange"><div class="stat-num" id="statSesiHariIni">—</div><div class="stat-label">Aktif Hari Ini</div></div>
+                <div class="stat-card red"><div class="stat-num" id="statPoints">—</div><div class="stat-label">Jumlah Point Aktif</div></div>
+            </div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-title"><i class="fas fa-file-excel"></i> Muat Turun Laporan Excel</div>
+                <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+                    <div class="form-group" style="margin:0">
+                        <label style="font-size:0.82rem;font-weight:600;margin-bottom:4px;display:block"><i class="fas fa-calendar-alt"></i> Pilih Bulan</label>
+                        <input type="month" id="downloadMonth" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:0.9rem;background:var(--surface);color:var(--text)">
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <button class="btn btn-success" onclick="downloadExcelByMonth('ahli_point_attendance')" style="background:linear-gradient(135deg,#cdaf07,#f10303)"><i class="fas fa-star"></i> Kehadiran Ahli Mengumpul Point</button>
+                        <button class="btn btn-success" onclick="downloadExcelByMonth('ahli_nfc')" style="background:linear-gradient(135deg,#0f4c75,#1b6ca8)"><i class="fas fa-wifi"></i> Ahli NFC</button>
+                        <button class="btn btn-primary" onclick="downloadExcelByMonth('bertugas')"><i class="fas fa-download"></i> Laporan Bertugas</button>
+                        <button class="btn btn-primary" onclick="downloadExcelByMonth('senarai_bertugas')" style="background:linear-gradient(135deg,#059669,#10b981)"><i class="fas fa-list-check"></i> Senarai Nama Bertugas</button>
+                        <button class="btn btn-warning" onclick="downloadExcelByMonth('pinjaman')"><i class="fas fa-download"></i> Rekod Pinjaman &amp; Pemulangan</button>
+                        <button class="btn btn-success" onclick="downloadExcelByMonth('bulk_attendance')" style="background:linear-gradient(135deg,#7c3aed,#a855f7)"><i class="fas fa-clipboard-check"></i> Download Kehadiran menggunakan IC</button>
+                    </div>
+                </div>
+                <div style="font-size:0.78rem;color:var(--text-muted)"><i class="fas fa-info-circle"></i> Kosongkan bulan untuk muat turun <strong>semua rekod</strong>. Pilih bulan untuk data bulan tertentu sahaja.</div>
+            </div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-title"><i class="fas fa-trash-alt"></i> Padam mengikut bulan daftar</div>
+                <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+                    <div class="form-group"><label>Pilih Bulan</label><input type="month" id="deleteMonth"></div>
+                    <button class="btn btn-danger" onclick="deleteByMonth('ahli')">Padam Semua Ahli (bulan ini)</button>
+                    <button class="btn btn-danger" onclick="deleteByMonth('bertugas')">Padam Semua Bertugas (bulan ini)</button>
+                </div>
+            </div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-title"><i class="fas fa-layer-group"></i> Urus Batch</div>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end">
+                    <div class="form-group"><label>Nombor Batch</label><input type="text" id="batchSearchInput" placeholder="cth: 06" onkeyup="filterAdminMembersByBatch()"></div>
+                    <button class="btn btn-primary" onclick="filterAdminMembersByBatch()"><i class="fas fa-search"></i> Cari Batch</button>
+                    <button class="btn btn-danger" onclick="deleteBatch()"><i class="fas fa-trash-alt"></i> Padam Batch Ini</button>
+                </div>
+                <div id="batchSearchResult" style="margin-top:12px; font-size:0.85rem; color:var(--text-muted)"></div>
+            </div>
+            <div class="card">
+                <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><span><i class="fas fa-users-cog"></i> Urus Ahli &amp; Point</span><button class="btn btn-primary btn-sm" onclick="showPage('urusBertugas')" style="background:linear-gradient(135deg,#0f4c75,#00b4d8)"><i class="fas fa-user-shield"></i> Urus Bertugas</button></div>
+                <div class="form-group" style="margin-bottom:16px"><label>Cari Nama</label><input type="text" id="adminMemberSearch" placeholder="Taip nama untuk cari..." onkeyup="filterAdminMembers()"></div>
+                <div class="table-wrap">
+                    <table><thead><tr><th>Nama</th><th>Kategori</th><th>Point</th><th>Tarikh Daftar</th><th>Tarikh Tamat</th><th>Baki Tempoh</th><th>Batch</th><th>Tindakan</th></tr></thead>
+                    <tbody id="adminMembersBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<!-- FINE PAYMENT MODAL -->
+<div class="modal-overlay" id="finePayModal">
+    <div class="modal" style="max-width:480px">
+        <div class="modal-title" style="color:#dc2626"><i class="fas fa-exclamation-triangle"></i> Bayaran Denda Lewat</div>
+        <input type="hidden" id="fineLoanId">
+        <div style="background:#fff5f5;border-radius:10px;padding:14px 16px;margin-bottom:14px;border:1px solid #fecaca">
+            <div id="fineLoanInfo" style="font-size:0.9rem;font-weight:600;color:#dc2626"></div>
+            <div id="fineDendaAmt" style="font-size:1.4rem;font-weight:800;color:#dc2626;margin-top:6px"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+            <label>Kaedah Bayaran Denda</label>
+            <select id="finePayMethod" onchange="toggleFinePayMethod()">
+                <option value="kad">Kad (Tolak Point)</option>
+                <option value="tunai">Tunai</option>
+            </select>
+        </div>
+        <div id="fineKadSection">
+            <div class="form-group" style="margin-bottom:8px">
+                <label>Tap Kad Ahli untuk Bayar</label>
+                <input type="text" id="finePayNfc" placeholder="Tap kad NFC di sini..." autocomplete="off">
+            </div>
+            <div id="finePayMemberInfo" style="background:#f1f5f9;padding:8px 12px;border-radius:8px;font-size:0.85rem;min-height:32px;margin-bottom:10px"></div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px"><i class="fas fa-info-circle"></i> Tap kad → point akan ditolak automatik → tekan <b>Bayar</b></div>
+        </div>
+        <div id="fineTunaiSection" style="display:none">
+            <div style="background:#f0fdf4;border-radius:8px;padding:10px 14px;font-size:0.88rem;color:#059669;margin-bottom:10px"><i class="fas fa-money-bill"></i> Terima tunai, kemudian tekan <b>Bayar</b> untuk sahkan</div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('finePayModal')">Batal</button>
+            <button class="btn btn-danger" onclick="submitFinePay()"><i class="fas fa-check-circle"></i> Bayar Denda &amp; Pulang Buku</button>
+        </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- URUS BERTUGAS PAGE - OUTSIDE MAIN, AS STANDALONE PAGE -->
+<div class="page" id="page-urusBertugas" style="padding:20px;max-width:1200px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <h2 style="font-size:1.2rem;font-weight:800;color:var(--primary)"><i class="fas fa-user-shield"></i> Pengurusan bahagian bertugas</h2>
+        <button class="btn btn-outline btn-sm" onclick="showPage('admin')"><i class="fas fa-arrow-left"></i> Kembali ke menu utama Admin</button>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+        <div class="card-title"><i class="fas fa-filter"></i> Carian &amp; filter atau kosongkan</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+            <div class="form-group" style="margin:0"><label>Cari Nama</label><input type="text" id="bertugasSearchName" placeholder="Taip nama..." oninput="filterBertugasList()"></div>
+            <div class="form-group" style="margin:0"><label>Batch</label><input type="text" id="bertugasFilterBatch" placeholder="cth: 06" oninput="filterBertugasList()"></div>
+            <div class="form-group" style="margin:0"><label>Kelas</label><input type="text" id="bertugasFilterKelas" placeholder="cth: 2 DVM" oninput="filterBertugasList()"></div>
+            <div class="form-group" style="margin:0"><label>Kategori/Peranan</label>
+                <select id="bertugasFilterKategori" onchange="filterBertugasList()">
+                    <option value="">Semua</option>
+                    <option value="Pelajar">Pelajar</option>
+                    <option value="Guru">Guru</option>
+                    <option value="AKP">AKP</option>
+                </select>
+            </div>
+        </div>
+        <div id="bertugasInfo" style="margin-top:10px;font-size:0.85rem;color:var(--text-muted)"></div>
+    </div>
+    <div class="card">
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Nama</th><th>UID/NFC</th><th>Batch</th><th>Kelas</th><th>Course</th><th>Kategori/Peranan</th><th>Jenis Ahli</th><th>Tindakan</th></tr></thead>
+                <tbody id="bertugasListBody"><tr><td colspan="9" class="empty-state">Memuatkan...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODALS (unchanged) -->
+<div class="modal-overlay" id="pointModal"><div class="modal"><div class="modal-title"><i class="fas fa-star"></i> Urus Point Ahli</div><input type="hidden" id="pointMemberId"><div class="form-group"><label>Nama Ahli</label><input type="text" id="pointMemberName" readonly></div><div class="form-group"><label>Point Semasa</label><input type="text" id="pointMemberCurrent" readonly></div><div class="form-grid"><div class="form-group"><label>Tindakan</label><select id="pointAction"><option value="tambah">Tambah Point</option><option value="tebus">Tebus Point</option></select></div><div class="form-group"><label>Jumlah Point</label><input type="number" id="pointAmount" min="1"></div><div class="form-group full"><label>Nota</label><input type="text" id="pointNote"></div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('pointModal')">Batal</button><button class="btn btn-primary" onclick="submitPoint()">Simpan</button></div></div></div>
+<div class="modal-overlay" id="deleteModal"><div class="modal"><div class="modal-title" style="color:var(--danger)"><i class="fas fa-triangle-exclamation"></i> Buang Ahli</div><input type="hidden" id="deleteMemberId"><p>Anda pasti mahu membuang <b id="deleteMemberName"></b>? Semua rekod akan dipadam.</p><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('deleteModal')">Batal</button><button class="btn btn-danger" onclick="confirmDelete()">Ya, Buang</button></div></div></div>
+<div class="modal-overlay" id="expiryModal"><div class="modal"><div class="modal-title"><i class="fas fa-calendar-alt"></i> Tetapkan Tarikh Tamat</div><input type="hidden" id="expiryMemberId"><div class="form-group"><label>Nama Ahli</label><input type="text" id="expiryMemberName" readonly></div><div class="form-group"><label>Tarikh Tamat</label><input type="date" id="expiryDate"><small>Kosongkan untuk tiada had</small></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('expiryModal')">Batal</button><button class="btn btn-primary" onclick="setExpiryDate()">Simpan</button></div></div></div>
+<div class="modal-overlay" id="historyModal"><div class="modal" style="max-width:560px"><div class="modal-title"><i class="fas fa-history"></i> Sejarah Point — <span id="historyMemberName"></span></div><div id="historyList"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('historyModal')">Tutup</button></div></div></div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="paymentModal">
+    <div class="modal">
+        <div class="modal-title"><i class="fas fa-money-bill-wave"></i> Bayaran Pusat Sumber</div>
+        <div class="form-group"><label>Kaedah Bayaran</label><select id="paymentMethod"><option value="kad">Kad (Tolak Point)</option><option value="tunai">Tunai (Rekod Sahaja)</option></select></div>
+        <div class="form-group"><label>Imbas Kad Ahli (untuk bayaran)</label><input type="text" id="paymentNfc" placeholder="Tap kad NFC di sini..." autocomplete="off"></div>
+        <div class="form-group"><label>Jumlah (RM)</label><input type="number" id="paymentAmount" step="0.01" min="0.01" placeholder="0.00" autofocus></div>
+        <div id="paymentMemberInfo" class="form-group" style="background:#f1f5f9; padding:8px; border-radius:8px;"></div>
+        <div class="form-group"><label>Nota (TAP CARD BARU LETAK JUMLAH THEN TEKAN ENTER BAGI MEMUDAHKAN PROSES)</label><input type="text" id="paymentNote"></div>
+        <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('paymentModal')">Batal</button><button class="btn btn-primary" onclick="processPayment()"><i class="fas fa-check-circle"></i> Bayar</button></div>
+    </div>
+</div>
+
+<!-- TOPUP MODAL -->
+<div class="modal-overlay" id="topupModal">
+    <div class="modal">
+        <div class="modal-title"><i class="fas fa-plus-circle"></i> Tambah Nilai Point</div>
+        <div class="form-group"><label>Imbas Kad Ahli</label><input type="text" id="topupNfc" placeholder="Tap kad NFC di sini..." autocomplete="off"></div>
+        <div id="topupMemberInfo" class="form-group" style="background:#f1f5f9; padding:8px; border-radius:8px;"></div>
+        <div class="form-group"><label>Jumlah Tambah Nilai (RM)</label><input type="number" id="topupAmount" step="0.01" min="0.01" placeholder="0.00"></div>
+        <div class="form-group"><label>Nota (TAP CARD BARU LETAK JUMLAH THEN TEKAN ENTER BAGI MEMUDAHKAN PROSES)</label><input type="text" id="topupNote"></div>
+        <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('topupModal')">Batal</button><button class="btn btn-primary" onclick="processTopup()"><i class="fas fa-check-circle"></i> Tambah</button></div>
+    </div>
+</div>
+
+<!-- LOAN MODAL -->
+<div class="modal-overlay" id="loanModal">
+    <div class="modal" style="max-width:560px">
+        <div class="modal-title"><i class="fas fa-book"></i> Pinjaman Buku</div>
+        <div id="loanStep1">
+            <div style="display:flex;gap:8px;margin-bottom:14px">
+                <button class="tab-btn active" id="loanTabNfc" onclick="switchLoanTab('nfc')"><i class="fas fa-wifi"></i> Tap Kad NFC</button>
+                <button class="tab-btn" id="loanTabIc" onclick="switchLoanTab('ic')"><i class="fas fa-id-card"></i> Guna No. IC</button>
+            </div>
+            <div id="loanNfcTab">
+                <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:12px">Tap kad pengguna untuk mula pinjaman</p>
+                <div class="form-group"><label>Tap / Imbas Kad (UID)</label>
+                    <div style="display:flex;gap:8px">
+                        <input type="text" id="loanNfc" placeholder="Tap kad NFC di sini..." autocomplete="off" style="flex:1">
+                        <button class="btn btn-primary btn-sm" onclick="loanCheckNfc()"><i class="fas fa-id-card"></i> Semak</button>
+                    </div>
+                </div>
+            </div>
+            <div id="loanIcTab" style="display:none">
+                <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:12px">Taip No. IC untuk cari peminjam (ahli atau bukan ahli)</p>
+                <div class="form-group"><label>No. IC</label>
+                    <div style="display:flex;gap:8px">
+                        <input type="text" id="loanIcSearch" placeholder="cth: xxxxxx-xx-xxxx" autocomplete="off" style="flex:1">
+                        <button class="btn btn-primary btn-sm" onclick="loanCheckIc()"><i class="fas fa-search"></i> Semak</button>
+                    </div>
+                </div>
+            </div>
+            <div id="loanNfcInfo" style="background:#f1f5f9;padding:10px 14px;border-radius:8px;font-size:0.88rem;min-height:32px;margin-top:8px"></div>
+        </div>
+        <div id="loanStep2" style="display:none">
+            <div class="form-grid">
+                <div class="form-group"><label>Nombor IC</label><input type="text" id="loanIc" placeholder="cth: xxxxxx-xx-xxxx"></div>
+                <div class="form-group"><label>Kelas</label><input type="text" id="loanKelas" placeholder="cth: 2 DVM ETN"></div>
+                <div class="form-group"><label>Nombor Buku</label><input type="text" id="loanBookNum" placeholder="cth: 6975225481428545"></div>
+                <div class="form-group"><label>Tajuk Buku</label><input type="text" id="loanBookTitle" placeholder="Tajuk buku..."></div>
+                <div class="form-group"><label>Tarikh Pinjam</label><input type="date" id="loanDate"></div>
+                <div class="form-group"><label>Tarikh Limit / Due Date</label><input type="date" id="loanDue"></div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('loanModal')">Batal</button>
+            <button class="btn btn-primary" id="loanActionBtn" onclick="handleLoanAction()"><i class="fas fa-arrow-right"></i> Seterusnya</button>
+        </div>
+    </div>
+</div>
+
+<!-- RETURN MODAL -->
+<div class="modal-overlay" id="returnModal">
+    <div class="modal" style="max-width:580px">
+        <div class="modal-title"><i class="fas fa-undo-alt"></i> Pemulangan Buku</div>
+        <div id="returnStep1">
+            <div style="display:flex;gap:8px;margin-bottom:14px">
+                <button class="tab-btn active" id="returnTabNfc" onclick="switchReturnTab('nfc')"><i class="fas fa-wifi"></i> Tap Kad NFC</button>
+                <button class="tab-btn" id="returnTabIc" onclick="switchReturnTab('ic')"><i class="fas fa-id-card"></i> Guna No. IC</button>
+            </div>
+            <div id="returnNfcTab">
+                <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:12px">Tap kad pengguna untuk semak pinjaman</p>
+                <div class="form-group"><label>Tap / Imbas Kad (UID)</label>
+                    <div style="display:flex;gap:8px">
+                        <input type="text" id="returnNfc" placeholder="Tap kad NFC di sini..." autocomplete="off" style="flex:1">
+                        <button class="btn btn-primary btn-sm" onclick="doReturnScan()"><i class="fas fa-search"></i> Semak</button>
+                    </div>
+                </div>
+            </div>
+            <div id="returnIcTab" style="display:none">
+                <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:12px">Taip No. IC untuk semak pinjaman aktif</p>
+                <div class="form-group"><label>No. IC</label>
+                    <div style="display:flex;gap:8px">
+                        <input type="text" id="returnIcInput" placeholder="cth: xxxxxx-xx-xxxx" autocomplete="off" style="flex:1">
+                        <button class="btn btn-primary btn-sm" onclick="doReturnScanIc()"><i class="fas fa-search"></i> Semak</button>
+                    </div>
+                </div>
+            </div>
+            <div id="returnNfcInfo" style="background:#f1f5f9;padding:10px 14px;border-radius:8px;font-size:0.88rem;min-height:32px;margin-top:8px"></div>
+        </div>
+        <div id="returnStep2" style="display:none">
+            <div id="returnLoanList" style="margin-bottom:12px"></div>
+            <div id="returnActionArea"></div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('returnModal')">Batal</button>
+            <button class="btn btn-primary" id="returnScanBtn" style="display:none" onclick="doReturnScan()"><i class="fas fa-search"></i> Semak Pinjaman</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- BULK REGISTER MODAL -->
+<div class="modal-overlay" id="bulkRegisterModal">
+    <div class="modal" style="max-width:600px">
+        <div class="modal-title"><i class="fas fa-file-upload"></i> Daftar Sekaligus (Upload Excel)</div>
+        <div style="background:#f0f9ff;border-radius:10px;padding:12px 16px;font-size:0.84rem;margin-bottom:16px">
+            <b><i class="fas fa-info-circle"></i> Format Excel:</b><br>
+            Kolum: <code>kelas | nama | no ic</code><br>
+            Baris pertama = header (akan dilangkau secara automatik)
+        </div>
+        <div class="form-grid">
+            <div class="form-group"><label>Upload File Excel (.xlsx)</label>
+                <input type="file" id="bulkExcelFile" accept=".xlsx,.xls" onchange="previewBulkExcel()">
+            </div>
+            <div class="form-group"><label>Nombor Batch</label>
+                <input type="text" id="bulkBatch" placeholder="cth: 06">
+            </div>
+            <div class="form-group"><label>Kategori</label>
+                <select id="bulkCategory"><option value="pelajar">Pelajar</option><option value="guru">Guru</option><option value="sekaligus">sekaligus</option></select>
+            </div>
+            <div class="form-group"><label>Tarikh Tamat (pilihan)</label>
+                <input type="date" id="bulkExpiry">
+            </div>
+        </div>
+        <div id="bulkPreview" style="margin-top:14px;max-height:220px;overflow-y:auto;font-size:0.82rem;border:1.5px solid var(--border);border-radius:8px;display:none">
+            <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="background:var(--primary);color:white"><th style="padding:8px">Kelas</th><th style="padding:8px">Nama</th><th style="padding:8px">No. IC</th></tr></thead>
+                <tbody id="bulkPreviewBody"></tbody>
+            </table>
+        </div>
+        <div id="bulkPreviewCount" style="font-size:0.82rem;color:var(--text-muted);margin-top:8px"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('bulkRegisterModal')">Batal</button>
+            <button class="btn btn-success" onclick="submitBulkRegister()"><i class="fas fa-upload"></i> Daftar Semua</button>
+        </div>
+    </div>
+</div>
+
+<!-- ASSIGN NFC MODAL (Setkan Sebagai Ahli) -->
+<div class="modal-overlay" id="assignNfcModal">
+    <div class="modal" style="max-width:560px">
+        <div class="modal-title"><i class="fas fa-id-card"></i> Setkan Sebagai Ahli — Tetapkan Kad NFC</div>
+        <div style="font-size:0.84rem;color:var(--text-muted);margin-bottom:14px">taip ic untuk set ahli <b>tidak perlu masukkan UID/SCAN hanya gunakan ic</b> masukkan No. IC → tap card → Simpan</div>
+
+        <!-- Tab: IC / NFC scan -->
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+            <button class="tab-btn active" id="assignTabIcBtn" onclick="switchAssignTab('ic')"><i class="fas fa-id-card"></i> Cari via No. IC</button>
+            <button class="tab-btn" id="assignTabNfcBtn" onclick="switchAssignTab('nfc')"><i class="fas fa-wifi"></i> Scan NFC Dulu (Hanya admin)</button>
+        </div>
+
+        <!-- IC search -->
+        <div id="assignTabIc">
+            <div class="form-group" style="margin-bottom:10px">
+                <label>No. IC Ahli</label>
+                <div style="display:flex;gap:8px">
+                    <input type="text" id="assignIc" placeholder="cth: xxxxxx-xx-xxxx" style="flex:1" onkeydown="if(event.key==='Enter') assignCheckIc()">
+                    <button class="btn btn-primary btn-sm" onclick="assignCheckIc()"><i class="fas fa-search"></i> Cari</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NFC scan first (untuk cari data) -->
+        <div id="assignTabNfc" style="display:none">
+            <div class="form-group" style="margin-bottom:10px">
+                <label>Scan Kad NFC (untuk kenali ahli)</label>
+                <input type="text" id="assignNfcLookup" placeholder="Tap kad NFC di sini untuk cari data ahli..." autocomplete="off" style="width:100%">
+            </div>
+        </div>
+
+        <!-- Info ahli yang dikenali -->
+        <div id="assignMemberInfo" style="background:#f1f5f9;padding:10px 14px;border-radius:8px;font-size:0.88rem;min-height:32px;margin-bottom:12px"></div>
+
+        <!-- NFC yang akan ditetapkan -->
+        <div class="form-group" style="margin-bottom:12px">
+            <label><i class="fas fa-wifi" style="color:var(--accent)"></i> Tap Kad NFC Baharu (untuk ditetapkan)</label>
+            <input type="text" id="assignNfcInput" placeholder="Tap kad NFC di sini..." autocomplete="off" style="width:100%">
+            <div id="assignNfcScanStatus" style="font-size:0.78rem;color:var(--text-muted);margin-top:4px"></div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Kategori Ahli -->
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Kategori Ahli</label>
+                <select id="assignCategory" onchange="onAssignCategoryChange()">
+                    <option value="ahli">Ahli Mengumpul Point</option>
+                    <option value="bertugas">Pengawas Bertugas</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tarikh Tamat (pilihan)</label>
+                <input type="date" id="assignExpiry">
+            </div>
+        </div>
+
+        <!-- Kategori/Peranan (Guru / AKP / Pelajar) — muncul untuk Bertugas -->
+        <div id="assignKategoriPerananGroup" style="display:none">
+            <div class="form-group" style="margin-bottom:10px">
+                <label>Kategori / Peranan</label>
+                <select id="assignKategoriPeranan" onchange="onAssignKategoriPerananChange()">
+                    <option value="pelajar">Pelajar</option>
+                    <option value="guru">Guru</option>
+                    <option value="akp">AKP</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Kelas + Batch — untuk Ahli Mengumpul Point -->
+        <div id="assignAhliKelasGroup" class="form-grid">
+            <div class="form-group">
+                <label>Kelas <span style="color:#64748b;font-weight:400">(contoh: 2 DVM ETN)</span></label>
+                <input type="text" id="assignKelas" placeholder="cth: 2 DVM ETN">
+            </div>
+            <div class="form-group">
+                <label>Batch</label>
+                <input type="text" id="assignBatch" placeholder="cth: 06">
+            </div>
+        </div>
+
+        <!-- Kelas + Batch untuk Pelajar Bertugas -->
+        <div id="assignBertugasKelasGroup" style="display:none" class="form-grid">
+            <div class="form-group">
+                <label>Kelas <span style="color:#64748b;font-weight:400">(pelajar bertugas)</span></label>
+                <input type="text" id="assignKelasB" placeholder="cth: 2 DVM ETN">
+            </div>
+            <div class="form-group">
+                <label>Batch</label>
+                <input type="text" id="assignBatchB" placeholder="cth: 06">
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('assignNfcModal')">Batal</button>
+            <button class="btn btn-warning" onclick="submitAssignNfc()"><i class="fas fa-save"></i> Tetapkan Kad</button>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT INDIVIDU AHLI MODAL -->
+<div class="modal-overlay" id="editMemberModal">
+    <div class="modal" style="max-width:520px">
+        <div class="modal-title"><i class="fas fa-user-pen"></i> Edit Individu Ahli</div>
+        <input type="hidden" id="editMemberId">
+        <div class="form-grid">
+            <div class="form-group"><label>UID / NFC</label><input type="text" id="editMemberNfc" placeholder="cth: 04A3B2C1 atau BULK_..."></div>
+            <div class="form-group"><label>Nama</label><input type="text" id="editMemberName"></div>
+            <div class="form-group"><label>Kelas</label><input type="text" id="editMemberKelas" placeholder="cth: 2 DVM"></div>
+            <div class="form-group"><label>Course</label>
+                <select id="editMemberCourse">
+                    <option value="">-- Tiada --</option>
+                    <option value="ETN">ETN</option><option value="ETE">ETE</option>
+                    <option value="MTK">MTK</option><option value="MTA">MTA</option>
+                    <option value="BAK">BAK</option><option value="BKP">BKP</option>
+                    <option value="PPU">PPU</option><option value="MPI">MPI</option>
+                    <option value="CTP">CTP</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Batch</label><input type="text" id="editMemberBatch" placeholder="cth: 06"></div>
+            <div class="form-group"><label>Kategori / Peranan</label>
+                <select id="editMemberCategory">
+                    <option value="pelajar">Pelajar</option>
+                    <option value="guru">Guru</option>
+                    <option value="akp">AKP</option>
+                </select>
+            </div>
+        </div>
+        <div style="margin-top:8px;font-size:0.78rem;color:var(--text-muted)"><i class="fas fa-info-circle"></i> <b>Point</b> dan <b>No. IC</b> tidak boleh diubah di sini.</div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('editMemberModal')">Batal</button>
+            <button class="btn btn-success" onclick="submitEditMember()"><i class="fas fa-save"></i> Simpan</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ===================== SAMBUNGAN GOOGLE APPS SCRIPT (GANTIKAN FLASK) =====================
+// Tampal URL Web App Google Apps Script anda di sini selepas Deploy (lihat langkah SETUP).
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqsgO9MaFZ726VquHU2ePMZhcR1heEvsBEKI3-O2JBcLP8gdSSBvokod_TH2oaqYfS/exec';
+
+// Token admin (menggantikan Flask session) — disimpan di localStorage supaya kekal log masuk selepas refresh.
+let adminToken = localStorage.getItem('psa_admin_token') || '';
+
+// Action yang memerlukan token admin (dihantar automatik oleh apiPost/apiGet di bawah).
+const ADMIN_ACTIONS = new Set([
+  'delete_member', 'delete_by_month', 'delete_by_batch', 'set_expiry',
+  'adjust_points', 'bertugas_list', 'admin_check'
+]);
+
+// GET: ?action=...&k=v...  (data hanya dibaca daripada Google Sheets)
+async function apiGet(action, params = {}) {
+  const merged = Object.assign({ action }, params);
+  if (ADMIN_ACTIONS.has(action) && !merged.token) merged.token = adminToken;
+  const qs = new URLSearchParams(merged).toString();
+  try {
+    return await fetch(`${GAS_URL}?${qs}`);
+  } catch (e) {
+    return { ok: false, json: async () => ({ success: false, message: 'Ralat sambungan ke server. Sila cuba lagi.' }) };
+  }
+}
+
+// POST: JSON body { action, ...data }. Guna text/plain supaya Apps Script terima tanpa CORS preflight.
+async function apiPost(action, data = {}) {
+  const payload = Object.assign({ action }, data);
+  if (ADMIN_ACTIONS.has(action) && !payload.token) payload.token = adminToken;
+  try {
+    return await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    return { ok: false, json: async () => ({ success: false, message: 'Ralat sambungan ke server. Sila cuba lagi.' }) };
+  }
+}
+
+// ===================== GLOBAL =====================
+let allMembers = [];
+let allSessions = [];
+let memberFilter = 'semua';
+let sessionFilter = 'semua';
+let isScanning = false;
+let paymentMember = null;
+let topupMember = null;
+
+// ===================== HELPERS =====================
+function formatDuration(minutes) {
+    if (!minutes && minutes !== 0) return '—';
+    const mins = parseInt(minutes);
+    if (isNaN(mins)) return '—';
+    if (mins < 60) return `${mins} minit`;
+    const hours = Math.floor(mins / 60);
+    const remainingMins = mins % 60;
+    if (remainingMins === 0) return `${hours} jam`;
+    return `${hours} jam ${remainingMins} minit`;
+}
+function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    const el = document.createElement('div');
+    el.className = `toast-item ${type}`;
+    el.textContent = msg;
+    toast.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.4s'; setTimeout(() => el.remove(), 400); }, 3200);
+}
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ===================== NAVIGATION =====================
+function showPage(page) {
+    // Hide all pages (including page-urusBertugas which is outside main)
+    document.querySelectorAll('.page').forEach(p => {
+        p.classList.remove('active');
+        // jika page luar main (urusBertugas), sembunyikan terus
+        if (p.id === 'page-urusBertugas' && page !== 'urusBertugas') {
+            p.style.display = 'none';
+        }
+    });
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+    if (page === 'urusBertugas') {
+        // Tunjuk page urusBertugas (luar main), sembunyikan main
+        document.querySelector('main').style.display = 'none';
+        const pg = document.getElementById('page-urusBertugas');
+        if (pg) { pg.style.display = 'block'; pg.classList.add('active'); }
+        loadBertugasList();
+    } else {
+        // Pastikan main kelihatan dan page-urusBertugas tersembunyi
+        document.querySelector('main').style.display = '';
+        const pgB = document.getElementById('page-urusBertugas');
+        if (pgB) { pgB.style.display = 'none'; pgB.classList.remove('active'); }
+        const pg = document.getElementById('page-' + page);
+        if (pg) pg.classList.add('active');
+        const nv = document.getElementById('nav-' + page);
+        if (nv) nv.classList.add('active');
+        if (page === 'scan') { loadLiveSessions(); loadLeaderboard(); loadBatchActivity(); loadActiveLoans(); loadTopBorrowers(); document.getElementById('nfcInput').focus(); }
+        if (page === 'sesi') loadTodaySessions();
+        if (page === 'ahli') loadMembers();
+        if (page === 'admin') checkAdminStatus();
+        if (page === 'kehadiran') { loadBulkAttendanceList(); setTimeout(()=>document.getElementById('bulkAttIc').focus(), 100); }
+    }
+}
+
+// ===================== UPDATE AHLI (BULK CLASS UPDATE) =====================
+async function loadBulkMembersByBatch() {
+    const batch = document.getElementById('upBatch').value.trim();
+    const course = document.getElementById('upCourse').value.trim();
+    if (!batch) { showToast('Sila masukkan nombor batch', 'error'); return; }
+    const body = document.getElementById('upMembersBody');
+    body.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Memuatkan...</td></tr>';
+    try {
+        const res = await apiPost('bulk_members_by_batch', { batch, course });
+        const data = await res.json();
+        if (!data.success) { showToast(data.message, 'error'); body.innerHTML = `<tr><td colspan="7" class="empty-state">${data.message}</td></tr>`; return; }
+        document.getElementById('upMembersInfo').innerHTML = `<i class="fas fa-users"></i> Jumlah: <b>${data.count}</b> ahli biasa IC dalam batch <b>${batch}</b>${course?' (course '+course+')':''}`;
+        if (!data.members.length) { body.innerHTML = '<tr><td colspan="7" class="empty-state">Tiada ahli sepadan</td></tr>'; return; }
+        window._upMembersCache = data.members;
+        body.innerHTML = data.members.map((m, i) => `<tr><td>${i+1}</td><td>${m.name}</td><td>${m.ic_number}</td><td>${m.kelas}</td><td>${m.batch}</td><td>${m.category||'-'}</td><td><button class="btn btn-warning btn-sm" onclick="openEditMemberModal(${m.id})"><i class="fas fa-pen"></i> Edit</button></td></tr>`).join('');
+    } catch(e) { showToast('Ralat sambungan', 'error'); }
+}
+async function bulkUpdateKelas() {
+    const batch = document.getElementById('upBatch').value.trim();
+    const course = document.getElementById('upCourse').value.trim();
+    const new_kelas = document.getElementById('upNewKelas').value.trim();
+    if (!batch || !new_kelas) { showToast('Sila lengkapkan batch dan kelas baru', 'error'); return; }
+    if (!confirm(`Kemaskini SEMUA ahli BULK/IC dalam batch ${batch}${course?' ('+course+')':''} ke kelas "${new_kelas}"?`)) return;
+    try {
+        const res = await apiPost('bulk_update_kelas', { batch, course, new_kelas });
+        const data = await res.json();
+        showToast(data.message, data.success?'success':'error');
+        if (data.success) loadBulkMembersByBatch();
+    } catch(e) { showToast('Ralat sambungan', 'error'); }
+}
+
+// ===================== KEHADIRAN IC/BULK =====================
+async function bulkAttendanceCheckin() {
+    const ic = document.getElementById('bulkAttIc').value.trim();
+    if (!ic) { showToast('Sila masukkan No. IC', 'error'); return; }
+    const result = document.getElementById('bulkAttResult');
+    try {
+        const res = await apiPost('bulk_attendance_checkin', { ic_number: ic });
+        const data = await res.json();
+        if (!data.success) {
+            if (data.not_found) {
+                showAutoPopup('IC tidak dijumpai SILA KE KAUNTER', 'error', 2000);
+                result.innerHTML = '';
+            } else {
+                result.innerHTML = `<div class="card" style="border-left:4px solid var(--danger);background:#fff5f5"><b style="color:var(--danger)"><i class="fas fa-circle-xmark"></i> ${data.message}</b></div>`;
+                showToast(data.message, 'error');
+            }
+            document.getElementById('bulkAttIc').value = '';
+        } else {
+            const m = data.member;
+            const cat = (m.category || '').toLowerCase();
+            const catLabel = cat === 'guru' ? 'Guru' : (cat === 'pelajar' ? 'Pelajar' : (m.category || '-'));
+            const catColor = cat === 'guru' ? '#7c3aed' : (cat === 'pelajar' ? '#0ea5e9' : '#64748b');
+            const catBadge = `<span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${catColor};color:#fff;font-size:0.75rem;font-weight:700;margin-left:6px">${catLabel}</span>`;
+            result.innerHTML = `<div class="card" style="border-left:4px solid var(--success);background:#f0fdf4"><b style="color:var(--success)"><i class="fas fa-circle-check"></i> ${data.message}</b><div style="margin-top:8px;font-size:0.9rem"><b>${m.name}</b> ${catBadge}<br>IC: ${m.ic_number} &middot; Kelas: ${m.kelas} &middot; Kategori: <b>${catLabel}</b><br>Tarikh: ${m.date} &middot; Masa: ${m.time}</div></div>`;
+            showToast('Kehadiran berjaya direkod', 'success');
+            document.getElementById('bulkAttIc').value = '';
+            loadBulkAttendanceList();
+        }
+        document.getElementById('bulkAttIc').focus();
+    } catch(e) { showToast('Ralat sambungan', 'error'); }
+}
+async function loadBulkAttendanceList() {
+    try {
+        const res = await apiGet('bulk_attendance_list');
+        const data = await res.json();
+        const body = document.getElementById('bulkAttBody');
+        if (!data.length) { body.innerHTML = '<tr><td colspan="5" class="empty-state">Tiada rekod hari ini</td></tr>'; return; }
+        body.innerHTML = data.map(r => `<tr><td>${r.name}</td><td>${r.ic_number}</td><td>${r.kelas}</td><td>${r.date}</td><td>${r.time}</td></tr>`).join('');
+    } catch(e) {}
+}
+
+// ===================== DASHBOARD =====================
+async function loadLeaderboard() {
+    try {
+        const res = await apiGet('leaderboard');
+        const data = await res.json();
+        const list = document.getElementById('leaderboardList');
+        if (!data.length) { list.innerHTML = '<li>Tiada data</li>'; return; }
+        list.innerHTML = data.map((item, idx) => `<li><span class="leaderboard-rank">${idx+1}</span><span class="leaderboard-name">${item.name}</span><span class="leaderboard-points">${item.points} pt</span></li>`).join('');
+    } catch(e) { console.error(e); }
+}
+async function loadBatchActivity() {
+    try {
+        const res = await apiGet('batch_activity');
+        const data = await res.json();
+        const container = document.getElementById('batchActivityList');
+        if (!data.length) { container.innerHTML = '<li>Tiada data kehadiran batch bulan ini</li>'; return; }
+        container.innerHTML = data.map(item => `<li><span><strong>Batch ${item.batch}</strong></span><span class="batch-count">${item.count} kehadiran</span></li>`).join('');
+    } catch(e) { console.error(e); }
+}
+
+// ===================== NFC SCAN =====================
+const nfcInput = document.getElementById('nfcInput');
+nfcInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doScan(); });
+let scanTimeout = null;
+nfcInput.addEventListener('input', () => {
+    clearTimeout(scanTimeout);
+    scanTimeout = setTimeout(() => { if (nfcInput.value.trim().length > 2) doScan(); }, 300);
+});
+async function doScan() {
+    if (isScanning) { showToast('Sila tunggu, sedang memproses...', 'warning'); return; }
+    const nfcId = nfcInput.value.trim();
+    if (!nfcId) { showToast('Sila imbas atau masukkan ID kad', 'error'); return; }
+    isScanning = true;
+    nfcInput.disabled = true;
+    document.getElementById('scanBtn').disabled = true;
+    try {
+        const res = await apiPost('scan', { nfc_id:nfcId });
+        const data = await res.json();
+        showScanResult(data);
+        nfcInput.value = '';
+        loadLiveSessions();
+        loadLeaderboard();
+        loadBatchActivity();
+    } catch(e) { showToast('Ralat sambungan server', 'error'); }
+    finally {
+        setTimeout(() => { nfcInput.disabled = false; document.getElementById('scanBtn').disabled = false; nfcInput.focus(); isScanning = false; }, 1500);
+    }
+}
+function showScanResult(data) {
+    const el = document.getElementById('scanResult');
+    el.className = 'scan-result card';
+    if (!data.success) {
+        el.innerHTML = `<div style="color:var(--danger)"><i class="fas fa-circle-xmark"></i> <b>Gagal</b><div class="result-msg">${data.message}</div></div>`;
+        el.classList.add('show', 'error');
+        return;
+    }
+    const m = data.member;
+    let statusBadge = '', bgClass = 'success';
+    if (data.status_type === 'selesai') statusBadge = `<span class="result-badge badge-selesai"><i class="fas fa-circle-check"></i> Selesai Bertugas (${formatDuration(m.duration)})</span>`;
+    else if (data.status_type === 'keluar_awal') { statusBadge = `<span class="result-badge badge-awal"><i class="fas fa-triangle-exclamation"></i> Keluar Awal Bertugas (${formatDuration(m.duration)})</span>`; bgClass = 'warning'; }
+    else if (data.status_type === 'checkin_ahli') statusBadge = `<span class="result-badge badge-checkin"><i class="fas fa-star"></i> Log Masuk Ahli</span>`;
+    else if (data.status_type === 'checkin_bertugas') statusBadge = `<span class="result-badge badge-checkin"><i class="fas fa-user-check"></i> Log Masuk Bertugas</span>`;
+    else if (data.status_type === 'checkout') statusBadge = `<span class="result-badge badge-selesai"><i class="fas fa-right-from-bracket"></i> Log Keluar</span>`;
+    let pointsInfo = m.category === 'ahli' ? `<div style="margin-top:8px;font-size:0.85rem;color:var(--primary);font-weight:600"><i class="fas fa-star" style="color:var(--warning)"></i> Jumlah Point: ${m.points} pt (RM ${(m.points/100).toFixed(2)})</div>` : '';
+    let autoLogoutInfo = data.auto_logout ? `<div style="margin-top:4px;font-size:0.78rem;color:var(--text-muted)"><i class="fas fa-clock"></i> Auto-logout pada: ${data.auto_logout}</div>` : '';
+    el.innerHTML = `<div class="result-name">${m.name}</div><div class="result-msg">${data.message}</div>${statusBadge}${pointsInfo}${autoLogoutInfo}`;
+    el.classList.add('show', bgClass);
+}
+
+// ===================== LIVE SESSIONS =====================
+async function loadLiveSessions() {
+    const res = await apiGet('today_sessions');
+    const sessions = await res.json();
+    const active = sessions.filter(s => !s.check_out);
+    document.getElementById('liveCount').textContent = `${active.length} orang aktif`;
+    const container = document.getElementById('liveSessions');
+    if (active.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-door-open"></i><p>Tiada sesi aktif sekarang</p></div>'; return; }
+    container.innerHTML = active.map(s => {
+        const initials = s.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        const avClass = s.category === 'bertugas' ? 'av-bertugas' : 'av-ahli';
+        const roleChip = s.role ? `<span class="role-chip chip-${s.role.toLowerCase()}">${s.role}</span>` : '';
+        return `<div class="session-item"><div class="session-avatar ${avClass}">${initials}</div><div class="session-info"><div class="session-name">${s.name} ${roleChip}</div><div class="session-meta"><i class="fas fa-clock"></i> Masuk: ${s.check_in} &nbsp;|&nbsp; ${s.category === 'bertugas' ? 'Bertugas' : 'Ahli'}</div></div><div class="session-status"><span class="dot-live"></span> Aktif</div></div>`;
+    }).join('');
+}
+
+// ===================== TODAY SESSIONS =====================
+async function loadTodaySessions() { const res = await apiGet('today_sessions'); allSessions = await res.json(); renderSessions(); }
+function filterSessions(f) { sessionFilter = f; const btns = document.querySelectorAll('#page-sesi .tab-btn'); btns.forEach(btn => btn.classList.remove('active')); if (event && event.target) event.target.classList.add('active'); renderSessions(); }
+function renderSessions() {
+    let data = allSessions;
+    if (sessionFilter === 'bertugas') data = data.filter(s => s.category === 'bertugas');
+    else if (sessionFilter === 'ahli') data = data.filter(s => s.category === 'ahli');
+    else if (sessionFilter === 'aktif') data = data.filter(s => !s.check_out);
+    const tbody = document.getElementById('sessionsBody');
+    if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>Tiada rekod</p></div></td></tr>'; return; }
+    tbody.innerHTML = data.map(s => {
+        let statusHtml = '—';
+        if (!s.check_out) statusHtml = '<span class="status-pill pill-blue"><span class="dot-live"></span>Aktif</span>';
+        else if (s.category === 'bertugas') {
+            if (s.status === 'selesai') statusHtml = '<span class="status-pill pill-green"> Selesai Bertugas</span>';
+            else if (s.status === 'keluar_awal') statusHtml = '<span class="status-pill pill-red"> Keluar Awal</span>';
+            else statusHtml = `<span class="status-pill pill-yellow">${s.status}</span>`;
+        } else statusHtml = `<span class="status-pill pill-green">+${s.points_earned} pt</span>`;
+        const roleChip = s.role ? `<span class="role-chip chip-${s.role.toLowerCase()}">${s.role}</span>` : '';
+        // Duration with colour for bertugas
+        let durationDisplay = '—';
+        if (s.duration || s.duration === 0) {
+            const mins = parseInt(s.duration);
+            let durColor = '';
+            if (s.category === 'bertugas' && s.check_out) {
+                if (mins <= 18) durColor = 'color:#dc2626;font-weight:700';
+                else if (mins <= 25) durColor = 'color:#d97706;font-weight:700';
+                else durColor = 'color:#059669;font-weight:700';
+            }
+            durationDisplay = durColor ? `<span style="${durColor}">${formatDuration(mins)}</span>` : formatDuration(mins);
+        }
+        return `<tr>
+            <td><b>${s.name}</b></td>
+            <td>${s.category === 'bertugas' ? '🔵 Bertugas' : '🟠 Ahli'} ${roleChip}</td>
+            <td>${s.check_in}</td>
+            <td>${s.check_out || '<span style="color:var(--success)">masih di dalam</span>'}</td>
+            <td>${durationDisplay}</td>
+            <td>${statusHtml}</td>
+        </tr>`;
+    }).join('');
+}
+
+// ===================== MEMBERS =====================
+async function loadMembers() { const res = await apiGet('members'); allMembers = await res.json(); renderMembers(); updateAdminStats(); }
+function filterMembers(f) { memberFilter = f; const btns = document.querySelectorAll('#page-ahli .tab-btn'); btns.forEach(btn => btn.classList.remove('active')); if (event && event.target) event.target.classList.add('active'); renderMembers(); }
+function renderMembers() {
+    let data = allMembers;
+    if (memberFilter === 'ahli') data = data.filter(m => m.category === 'ahli');
+    else if (memberFilter === 'bertugas') data = data.filter(m => m.category === 'bertugas');
+    const tbody = document.getElementById('membersBody');
+    if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-users"></i><p>Tiada ahli</p></div></td></tr>'; return; }
+    tbody.innerHTML = data.map(m => {
+        const ptHtml = m.category === 'ahli' ? `<div class="pts-display"><i class="fas fa-star star"></i>${m.points} pt <span class="pts-rm">RM ${(m.points/100).toFixed(2)}</span></div>` : `<span class="status-pill ${m.is_active ? 'pill-green' : 'pill-blue'}">${m.is_active ? '🟢 Bertugas' : 'Tidak Aktif'}</span>`;
+        const roleChip = m.role ? `<span class="role-chip chip-${m.role.toLowerCase()}">${m.role}</span>` : `<span class="role-chip chip-ahli">Ahli</span>`;
+        const activeChip = m.is_active ? ' <span class="dot-live"></span>' : '';
+        const expiryDisplay = m.expiry_date ? m.expiry_date : 'unlimited';
+        const remainingDisplay = m.remaining ? m.remaining : 'Premium Subscription';
+        return `<tr>
+            <td><b>${m.name}</b>${activeChip}</td>
+            <td style="font-family:monospace;font-size:0.82rem">${m.nfc_id}</td>
+            <td>${roleChip}</td>
+            <td>${ptHtml}</td>
+            <td style="font-size:0.8rem;color:var(--text-muted)">${m.created_at}</td>
+            <td>${expiryDisplay}</td>
+            <td>${remainingDisplay}</td>
+            <td>${m.batch || '—'}</td>
+            <td>${m.category === 'ahli' ? `<button class="btn btn-warning btn-sm" onclick="showHistory(${m.id},'${m.name.replace(/'/g, "\\'")}')"><i class="fas fa-history"></i></button> ` : ''}</td>
+        </tr>`;
+    }).join('');
+}
+
+// ===================== REGISTER =====================
+function toggleRoleAndExpiry() {
+    const cat = document.getElementById('regCategory').value;
+    // Peranan kini wajib untuk ahli & bertugas
+    document.getElementById('roleGroup').style.display = (cat === 'ahli' || cat === 'bertugas') ? 'block' : 'none';
+    document.getElementById('initialPointsGroup').style.display = cat === 'ahli' ? 'block' : 'none';
+    document.getElementById('expiryGroup').style.display = (cat === 'ahli' || cat === 'bertugas') ? 'block' : 'none';
+    document.getElementById('batchGroup').style.display = (cat === 'ahli' || cat === 'bertugas') ? 'block' : 'none';
+    toggleKelasInput();
+}
+function toggleKelasInput() {
+    const role = document.getElementById('regRole').value;
+    document.getElementById('kelasGroup').style.display = role === 'pelajar' ? 'block' : 'none';
+}
+async function registerMember() {
+    const nfc_id = document.getElementById('regNfc').value.trim();
+    const name = document.getElementById('regName').value.trim();
+    const category = document.getElementById('regCategory').value;
+    const roleSel = document.getElementById('regRole').value;
+    const kelas = document.getElementById('regKelas') ? document.getElementById('regKelas').value.trim() : '';
+    const expiry_date = document.getElementById('regExpiry').value;
+    const batch = document.getElementById('regBatch').value.trim();
+    const ic_number = document.getElementById('regIc') ? document.getElementById('regIc').value.trim() : '';
+    const initial_points = parseInt(document.getElementById('regInitialPoints').value) || 0;
+    if (!nfc_id || !name || !category) { showToast('Sila isi semua maklumat', 'error'); return; }
+    if (!roleSel) { showToast('Sila pilih peranan (Guru/Pelajar/AKP)', 'error'); return; }
+    if (roleSel === 'pelajar' && !kelas) { showToast('Sila isi kelas untuk pelajar', 'error'); return; }
+    // Auto: Guru/AKP -> tulis 'Guru'/'AKP'; Pelajar -> tulis nama kelas
+    let role;
+    if (roleSel === 'guru') role = 'Guru';
+    else if (roleSel === 'AKP') role = 'AKP';
+    else role = kelas;
+    const payload = { nfc_id, name, category, role, initial_points, ic_number: ic_number || undefined };
+    if (expiry_date) payload.expiry_date = expiry_date;
+    if (batch) payload.batch = batch;
+    const res = await apiPost('register', payload);
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) {
+        document.getElementById('regNfc').value = '';
+        if(document.getElementById('regIc')) document.getElementById('regIc').value = '';
+        document.getElementById('regName').value = '';
+        document.getElementById('regCategory').value = '';
+        document.getElementById('regRole').value = '';
+        if(document.getElementById('regKelas')) document.getElementById('regKelas').value = '';
+        document.getElementById('regExpiry').value = '';
+        document.getElementById('regBatch').value = '';
+        document.getElementById('regInitialPoints').value = '0';
+        document.getElementById('roleGroup').style.display = 'none';
+        document.getElementById('kelasGroup').style.display = 'none';
+        document.getElementById('initialPointsGroup').style.display = 'none';
+        document.getElementById('expiryGroup').style.display = 'none';
+        document.getElementById('batchGroup').style.display = 'none';
+        loadMembers();
+    }
+}
+
+// ===================== ADMIN (FIXED) =====================
+async function checkAdminStatus() {
+    const res = await apiGet('admin_check', { token: adminToken });
+    const data = await res.json();
+    if (data.logged_in) {
+        document.getElementById('adminLogin').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        await loadAdminMembers();
+        updateAdminStats();
+    } else {
+        document.getElementById('adminLogin').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+}
+async function adminLogin() {
+    const pass = document.getElementById('adminPass').value;
+    const res = await apiPost('admin_login', { password:pass });
+    const data = await res.json();
+    if (data.success) { adminToken = data.token; localStorage.setItem('psa_admin_token', adminToken); checkAdminStatus(); showToast('Log masuk admin berjaya!'); }
+    else { showToast(data.message || 'Kata laluan salah', 'error'); }
+}
+async function adminLogout() {
+    await apiPost('admin_logout', { token: adminToken });
+    adminToken = ''; localStorage.removeItem('psa_admin_token');
+    checkAdminStatus();
+    showToast('Log keluar admin');
+}
+async function loadAdminMembers() {
+    const res = await apiGet('members');
+    const members = await res.json();
+    adminMembersList = members;
+    filterAdminMembers();
+}
+let adminMembersList = [];
+let currentBatchFilter = '';
+function filterAdminMembers() {
+    const searchTerm = document.getElementById('adminMemberSearch').value.toLowerCase();
+    let filtered = adminMembersList.filter(m => m.name.toLowerCase().includes(searchTerm));
+    if (currentBatchFilter !== '') {
+        filtered = filtered.filter(m => m.batch === currentBatchFilter);
+    }
+    const tbody = document.getElementById('adminMembersBody');
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-users"></i><p>Tiada ahli</p></div></td></tr>';
+        return;
+    }
+    tbody.innerHTML = filtered.map(m => {
+        const ptHtml = m.category === 'ahli' 
+            ? `<div class="pts-display"><i class="fas fa-star star"></i>${m.points} pt <span class="pts-rm">RM ${(m.points/100).toFixed(2)}</span></div>`
+            : '—';
+        const roleChip = m.role ? `<span class="role-chip chip-${m.role.toLowerCase()}">${m.role}</span>` : `<span class="role-chip chip-ahli">Ahli</span>`;
+        const expiryDisplay = m.expiry_date ? m.expiry_date : '	Unlimited';
+        const remainingDisplay = m.remaining ? m.remaining : 'Premium Subscription';
+        return `<tr>
+            <td><b>${m.name}</b> ${roleChip}</td>
+            <td>${m.category === 'bertugas' ? '🔵 Bertugas' : '🟠 Ahli'}</td>
+            <td>${ptHtml}</td>
+            <td style="font-size:0.8rem">${m.created_at}</td>
+            <td>${expiryDisplay}</td>
+            <td>${remainingDisplay}</td>
+            <td>${m.batch || '—'}</td>
+            <td style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px">
+                ${m.category === 'ahli' ? `<button class="btn btn-warning btn-sm" onclick="openPointModal(${m.id},'${m.name.replace(/'/g, "\\'")}',${m.points})"><i class="fas fa-star"></i> Point</button>` : ''}
+                ${m.category === 'ahli' ? `<button class="btn btn-info btn-sm" onclick="openExpiryModal(${m.id},'${m.name.replace(/'/g, "\\'")}','${m.expiry_date || ''}')"><i class="fas fa-calendar"></i> Tamat</button>` : ''}
+                <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${m.id},'${m.name.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+function filterAdminMembersByBatch() {
+    const batch = document.getElementById('batchSearchInput').value.trim();
+    currentBatchFilter = batch;
+    if (batch === '') document.getElementById('batchSearchResult').innerHTML = '';
+    else document.getElementById('batchSearchResult').innerHTML = `Menunjukkan ahli dalam batch <strong>${batch}</strong>`;
+    filterAdminMembers();
+}
+async function deleteBatch() {
+    const batch = document.getElementById('batchSearchInput').value.trim();
+    if (!batch) { showToast('Sila masukkan nombor batch', 'error'); return; }
+    if (!confirm(`Anda pasti mahu membuang SEMUA ahli dalam batch "${batch}"? Tindakan ini tidak boleh dibatalkan.`)) return;
+    const res = await apiPost('delete_by_batch', { batch });
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) {
+        document.getElementById('batchSearchInput').value = '';
+        currentBatchFilter = '';
+        await loadAdminMembers();
+        loadMembers();
+    }
+}
+async function updateAdminStats() {
+    const res = await apiGet('members');
+    const members = await res.json();
+    const res2 = await apiGet('today_sessions');
+    const sessions = await res2.json();
+    document.getElementById('statAhli').textContent = members.filter(m=>m.category==='ahli').length;
+    document.getElementById('statBertugas').textContent = members.filter(m=>m.category==='bertugas').length;
+    document.getElementById('statSesiHariIni').textContent = sessions.length;
+    document.getElementById('statPoints').textContent = members.filter(m=>m.category==='ahli').reduce((s,m)=>s+m.points,0);
+}
+function openPointModal(id, name, points) {
+    document.getElementById('pointMemberId').value = id;
+    document.getElementById('pointMemberName').value = name;
+    document.getElementById('pointMemberCurrent').value = points + ' pt (RM ' + (points/100).toFixed(2) + ')';
+    document.getElementById('pointAmount').value = '';
+    document.getElementById('pointNote').value = '';
+    openModal('pointModal');
+}
+async function submitPoint() {
+    const member_id = document.getElementById('pointMemberId').value;
+    const action = document.getElementById('pointAction').value;
+    const points = parseInt(document.getElementById('pointAmount').value);
+    const note = document.getElementById('pointNote').value;
+    if (!points || points < 1) { showToast('Sila masukkan jumlah point', 'error'); return; }
+    const res = await apiPost('adjust_points', { member_id, action, points, note });
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) { closeModal('pointModal'); await loadAdminMembers(); loadMembers(); loadLeaderboard(); }
+}
+function openDeleteModal(id, name) {
+    document.getElementById('deleteMemberId').value = id;
+    document.getElementById('deleteMemberName').textContent = name;
+    openModal('deleteModal');
+}
+async function confirmDelete() {
+    const id = document.getElementById('deleteMemberId').value;
+    const res = await apiPost('delete_member', { id });
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) { closeModal('deleteModal'); await loadAdminMembers(); loadMembers(); loadLeaderboard(); }
+}
+async function deleteByMonth(category) {
+    const month = document.getElementById('deleteMonth').value;
+    if (!month) { showToast('Sila pilih bulan terlebih dahulu', 'error'); return; }
+    const res = await apiPost('delete_by_month', { category, month });
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) await loadAdminMembers();
+}
+function openExpiryModal(id, name, currentExpiry) {
+    document.getElementById('expiryMemberId').value = id;
+    document.getElementById('expiryMemberName').value = name;
+    document.getElementById('expiryDate').value = currentExpiry;
+    openModal('expiryModal');
+}
+async function setExpiryDate() {
+    const member_id = document.getElementById('expiryMemberId').value;
+    const expiry_date = document.getElementById('expiryDate').value;
+    const res = await apiPost('set_expiry', { member_id, expiry_date: expiry_date || null });
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) { closeModal('expiryModal'); await loadAdminMembers(); loadMembers(); }
+}
+function downloadExcel(type) { window.location.href = `${GAS_URL}?action=export_csv&type=${type}&token=${encodeURIComponent(adminToken)}`; showToast(`Muat turun laporan ${type} dimulakan...`); }
+
+function downloadExcelByMonth(type) {
+    const monthInput = document.getElementById('downloadMonth');
+    const month = monthInput ? monthInput.value : '';
+    let url = `${GAS_URL}?action=export_csv&type=${type}&token=${encodeURIComponent(adminToken)}`;
+    if (month) url += `&month=${month}`;
+    window.location.href = url;
+    const typeLabel = type === 'ahli_nfc' ? 'Ahli NFC' : type === 'ahli_biasa' ? 'Ahli Biasa' : type === 'bulk_attendance' ? 'Kehadiran IC/BULK' : type;
+    const label = month ? `bulan ${month}` : 'semua rekod';
+    showToast(`Muat turun ${typeLabel} (${label}) dimulakan...`);
+}
+async function showHistory(id, name) {
+    document.getElementById('historyMemberName').textContent = name;
+    const res = await apiGet('point_history', { member_id: id });
+    const txs = await res.json();
+    const list = document.getElementById('historyList');
+    if (txs.length === 0) { list.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><p>Tiada sejarah</p></div>'; }
+    else { list.innerHTML = txs.map(t => { const isPos = t.points > 0; return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:${isPos?'#f0fdf4':'#fef2f2'};border-radius:8px;border-left:3px solid ${isPos?'var(--success)':'var(--danger)'}"><div><div style="font-weight:700;font-size:0.88rem">${t.note || t.action}</div><div style="font-size:0.75rem;color:var(--text-muted)">${t.date}</div></div><div style="font-weight:800;font-size:1rem;color:${isPos?'var(--success)':'var(--danger)'}">${isPos?'+':''}${t.points} pt</div></div>`; }).join(''); }
+    openModal('historyModal');
+}
+
+// ===================== PAYMENT =====================
+function openPaymentModal() {
+    openModal('paymentModal');
+    paymentMember = null;
+    document.getElementById('paymentMemberInfo').innerHTML = '';
+    document.getElementById('paymentNfc').value = '';
+    document.getElementById('paymentAmount').value = '';
+    document.getElementById('paymentNote').value = '';
+    document.getElementById('paymentAmount').focus();
+}
+document.getElementById('paymentAmount').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        if (paymentMember) processPayment();
+        else showToast('Sila imbas kad dahulu', 'warning');
+    }
+});
+document.getElementById('paymentNfc').addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+        const nfc = e.target.value.trim();
+        if (nfc) await fetchPaymentMember(nfc);
+    }
+});
+async function fetchPaymentMember(nfcId) {
+    const res = await apiPost('get_member_by_nfc', { nfc_id:nfcId });
+    const data = await res.json();
+    if (data.success && data.member) {
+        paymentMember = data.member;
+        document.getElementById('paymentMemberInfo').innerHTML = `<strong><i class="fas fa-id-card"></i> ${paymentMember.name}</strong><br>Point: ${paymentMember.points} pt (RM ${(paymentMember.points/100).toFixed(2)})`;
+    } else {
+        paymentMember = null;
+        document.getElementById('paymentMemberInfo').innerHTML = '<span style="color:red">Kad tidak dikenali</span>';
+    }
+}
+async function processPayment() {
+    const method = document.getElementById('paymentMethod').value;
+    const amount = parseFloat(document.getElementById('paymentAmount').value);
+    const note = document.getElementById('paymentNote').value;
+    if (isNaN(amount) || amount <= 0) { showToast('Jumlah tidak sah', 'error'); return; }
+    if (!paymentMember) { showToast('Sila imbas kad ahli terlebih dahulu', 'error'); return; }
+    const res = await apiPost('payment', { member_id:paymentMember.id, amount_rm:amount, method:method, note:note });
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) {
+        closeModal('paymentModal');
+        if (method === 'kad') {
+            loadMembers();
+            loadLeaderboard();
+            if (document.getElementById('page-admin').classList.contains('active')) loadAdminMembers();
+        }
+    }
+}
+
+// ===================== TOPUP =====================
+function openTopupModal() {
+    openModal('topupModal');
+    topupMember = null;
+    document.getElementById('topupMemberInfo').innerHTML = '';
+    document.getElementById('topupNfc').value = '';
+    document.getElementById('topupAmount').value = '';
+    document.getElementById('topupNote').value = '';
+    document.getElementById('topupNfc').focus();
+}
+document.getElementById('topupNfc').addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+        const nfc = e.target.value.trim();
+        if (nfc) await fetchTopupMember(nfc);
+    }
+});
+document.getElementById('topupAmount').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        if (topupMember) processTopup();
+        else showToast('Sila imbas kad dahulu', 'warning');
+    }
+});
+async function fetchTopupMember(nfcId) {
+    const res = await apiPost('get_member_by_nfc', { nfc_id:nfcId });
+    const data = await res.json();
+    if (data.success && data.member) {
+        topupMember = data.member;
+        document.getElementById('topupMemberInfo').innerHTML = `<strong><i class="fas fa-id-card"></i> ${topupMember.name}</strong><br>Point semasa: ${topupMember.points} pt (RM ${(topupMember.points/100).toFixed(2)})`;
+        document.getElementById('topupAmount').focus();
+    } else {
+        topupMember = null;
+        document.getElementById('topupMemberInfo').innerHTML = '<span style="color:red">Kad tidak dikenali</span>';
+    }
+}
+async function processTopup() {
+    const amount = parseFloat(document.getElementById('topupAmount').value);
+    const note = document.getElementById('topupNote').value;
+    if (isNaN(amount) || amount <= 0) { showToast('Jumlah tidak sah', 'error'); return; }
+    if (!topupMember) { showToast('Sila imbas kad ahli terlebih dahulu', 'error'); return; }
+    const res = await apiPost('topup', { member_id:topupMember.id, amount_rm:amount, note:note });
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) {
+        closeModal('topupModal');
+        loadMembers();
+        loadLeaderboard();
+        if (document.getElementById('page-admin').classList.contains('active')) loadAdminMembers();
+    }
+}
+
+// ===================== MODAL CLICK OUTSIDE =====================
+document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+});
+
+// ===================== QUEUE SYSTEM (SERVER-BACKED, MULTI-DEVICE) =====================
+// Source of truth: sheet 'queue' di Google Sheets (melalui action=queue / queue_*).
+// JavaScript di sini HANYA cache paparan sementara — semua state sebenar disimpan di server
+// supaya semua device (Device A / Device B / ...) sentiasa melihat queue yang sama.
+
+let qState = null;          // salinan terkini state queue daripada server
+let qPollTimer = null;      // SATU sahaja timer polling (tidak duplicate walau tab dibuka semula)
+let qPollInFlight = false;  // elak overlap request jika server lambat balas
+let qLastUrusanId = null;   // untuk elak ulang sebut TTS bila polling refresh
+let qLastPaymentId = null;
+
+const qSynth = window.speechSynthesis;
+let qVoices = [];
+function qLoadVoices(){ qVoices = qSynth.getVoices(); }
+qLoadVoices();
+if (qSynth.onvoiceschanged !== undefined) qSynth.onvoiceschanged = qLoadVoices;
+
+function qPickVoice(){
+  return qVoices.find(v=>v.lang==='ms-MY')
+      || qVoices.find(v=>v.lang.startsWith('ms'))
+      || qVoices.find(v=>v.lang==='id-ID')
+      || qVoices.find(v=>v.lang.startsWith('id'))
+      || qVoices.find(v=>v.lang.startsWith('en'))
+      || (qVoices.length ? qVoices[0] : null);
+}
+function qSpeak(text, cb){
+  qSynth.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const v = qPickVoice();
+  if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'ms-MY'; }
+  u.rate = 0.88; u.pitch = 1.05;
+  u.onstart = () => { qSetLog(true, '🔊 ' + text); };
+  u.onend   = () => { qSetLog(false, 'Selesai menyebut.'); if (cb) cb(); };
+  u.onerror = () => { qSetLog(false, '⚠️ Audio error.'); };
+  qSynth.speak(u);
+}
+
+// ---------- Tindakan pengguna (setiap satu hantar ke server, kemudian refresh serta-merta) ----------
+async function qAddName(){
+  const inp = document.getElementById('qUInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  inp.value=''; inp.focus();
+  qSetLog(true, 'Menambah...');
+  try {
+    const res = await apiPost('queue_add', { name });
+    const data = await res.json();
+    if (data.success) qSetLog(false, '✅ Ditambah: ' + name);
+    else qSetLog(false, '⚠️ ' + (data.message || 'Gagal menambah'));
+  } catch(e) { qSetLog(false, '⚠️ Ralat sambungan ke server. Sila cuba lagi.'); }
+  await qRefresh();
+}
+
+async function qCallUrusan(){
+  qSetLog(true, 'Memanggil...');
+  try {
+    const res = await apiPost('queue_call_urusan', {});
+    const data = await res.json();
+    if (!data.success) { qSetLog(false, '⚠️ ' + (data.message || 'Tiada lagi dalam giliran urusan')); await qRefresh(); return; }
+    await qRefresh();
+    document.getElementById('qUDisplay').classList.add('q-speaking');
+    document.getElementById('qURepeat').disabled = false;
+    qSpeak(data.tts, () => document.getElementById('qUDisplay').classList.remove('q-speaking'));
+  } catch(e) { qSetLog(false, '⚠️ Ralat sambungan ke server. Sila cuba lagi.'); }
+}
+
+function qRepeatUrusan(){
+  if (!qState || !qState.current_urusan) return;
+  const p = qState.current_urusan;
+  document.getElementById('qUDisplay').classList.add('q-speaking');
+  qSpeak('Giliran ' + p.name + '. ' + p.name + ', sila ke kaunter urusan.',
+    () => document.getElementById('qUDisplay').classList.remove('q-speaking'));
+}
+
+async function qAssignPC(n){
+  if (!qState || !qState.current_urusan) { qSetLog(false, '⚠️ Panggil orang dulu sebelum assign PC.'); return; }
+  const pcInfo = qState.pcs.find(pc => pc.pc === n);
+  if (pcInfo && pcInfo.state === 1 && pcInfo.queue_id !== qState.current_urusan.id) { qSetLog(false, '⚠️ PC ' + n + ' sedang sibuk.'); return; }
+  try {
+    const res = await apiPost('queue_assign_pc', { queue_id: qState.current_urusan.id, pc_number: n });
+    const data = await res.json();
+    if (!data.success) { qSetLog(false, '⚠️ ' + data.message); return; }
+    document.getElementById('qUPcBadge').textContent = 'PC ' + n;
+    document.getElementById('qUPcBadge').style.display = 'inline-block';
+    document.getElementById('qUInfo').textContent = 'Diarahkan ke PC ' + n;
+    qSpeak(data.tts);
+    qSetLog(false, '✅ ' + data.message);
+  } catch(e) { qSetLog(false, '⚠️ Ralat sambungan ke server. Sila cuba lagi.'); }
+  await qRefresh();
+}
+
+async function qPcReady(n){
+  try {
+    const res = await apiPost('queue_pc_ready', { pc_number: n });
+    const data = await res.json();
+    if (!data.success) { qSetLog(false, '⚠️ ' + data.message); return; }
+    qSetLog(false, '💳 ' + data.message);
+    document.getElementById('qPayAlertName').textContent = data.name + ' (PC ' + n + ') —, sila ke kaunter pembayaran';
+    document.getElementById('qPayAlert').classList.add('q-show');
+    setTimeout(() => document.getElementById('qPayAlert').classList.remove('q-show'), 5000);
+  } catch(e) { qSetLog(false, '⚠️ Ralat sambungan ke server. Sila cuba lagi.'); }
+  await qRefresh();
+}
+
+async function qCallPayment(){
+  qSetLog(true, 'Memanggil...');
+  try {
+    const res = await apiPost('queue_call_payment', {});
+    const data = await res.json();
+    if (!data.success) { qSetLog(false, '⚠️ ' + (data.message || 'Tiada lagi dalam giliran bayar')); await qRefresh(); return; }
+    await qRefresh();
+    document.getElementById('qPDisplay').classList.add('q-speaking');
+    document.getElementById('qPRepeat').disabled = false;
+    qSpeak(data.tts, () => document.getElementById('qPDisplay').classList.remove('q-speaking'));
+  } catch(e) { qSetLog(false, '⚠️ Ralat sambungan ke server. Sila cuba lagi.'); }
+}
+
+function qRepeatPayment(){
+  if (!qState || !qState.current_payment) return;
+  const p = qState.current_payment;
+  document.getElementById('qPDisplay').classList.add('q-speaking');
+  qSpeak(p.name + ', panggilan terakhir, sila ke kaunter pembayaran.',
+    () => document.getElementById('qPDisplay').classList.remove('q-speaking'));
+}
+
+async function qDelUr(id){
+  try {
+    const res = await apiPost('queue_delete', { queue_id: id });
+    const data = await res.json();
+    if (!data.success) qSetLog(false, '⚠️ ' + (data.message || 'Tidak boleh dibuang'));
+  } catch(e) { qSetLog(false, '⚠️ Ralat sambungan ke server. Sila cuba lagi.'); }
+  await qRefresh();
+}
+
+async function qResetAll(){
+  if (!confirm('Reset SEMUA queue (semua device)? Tindakan ini tidak boleh diundur.')) return;
+  qSynth.cancel();
+  qSetLog(true, 'Mereset...');
+  try {
+    await apiPost('queue_reset', {});
+  } catch(e) { /* teruskan walaupun ralat rangkaian, refresh tetap cuba */ }
+  document.getElementById('qUPcBadge').style.display = 'none';
+  document.getElementById('qUDisplay').classList.remove('q-speaking');
+  document.getElementById('qPDisplay').classList.remove('q-speaking');
+  document.getElementById('qURepeat').disabled = true;
+  document.getElementById('qPRepeat').disabled = true;
+  document.getElementById('qPayAlert').classList.remove('q-show');
+  qLastUrusanId = null; qLastPaymentId = null;
+  await qRefresh();
+  qSetLog(false, 'Sistem di-reset. Sedia untuk mula semula.');
+}
+
+function qEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function qSetLog(active, msg){
+  const dot = document.getElementById('qLogDot');
+  if (dot) dot.className = 'q-log-dot' + (active ? ' q-active' : '');
+  const txt = document.getElementById('qLogText');
+  if (txt) txt.textContent = msg;
+}
+
+// ---------- Ambil state terkini daripada server & lukis semula UI ----------
+async function qRefresh(){
+  if (qPollInFlight) return;
+  qPollInFlight = true;
+  try {
+    const res = await apiGet('queue', {});
+    const data = await res.json();
+    if (data && data.success) {
+      qState = data;
+      qRenderAll();
+    }
+  } catch (e) {
+    // Senyap semasa polling background; ralat ditunjuk hanya bila tindakan pengguna gagal.
+  } finally {
+    qPollInFlight = false;
+  }
+}
+
+function qRenderAll(){
+  if (!qState) return;
+  qRenderUrusanDisplay();
+  qRenderUrusanList();
+  qRenderPayment();
+  qRenderPCGrid();
+  qRenderPCAssignBtns();
+  qUpdateUBtn();
+  qUpdatePBtn();
+}
+
+function qRenderUrusanDisplay(){
+  const cur = qState.current_urusan;
+  if (cur && cur.id !== qLastUrusanId) {
+    qAnimateName('qUName', cur.name);
+    qLastUrusanId = cur.id;
+    document.getElementById('qURepeat').disabled = false;
+  } else if (!cur) {
+    document.getElementById('qUName').textContent = '—';
+    qLastUrusanId = null;
+  }
+  if (cur) {
+    const pc = qState.pcs.find(x => x.queue_id === cur.id && (x.state === 1 || x.state === 2));
+    if (pc) {
+      document.getElementById('qUPcBadge').textContent = 'PC ' + pc.pc;
+      document.getElementById('qUPcBadge').style.display = 'inline-block';
+      document.getElementById('qUInfo').textContent = 'Diarahkan ke PC ' + pc.pc;
+    } else {
+      document.getElementById('qUPcBadge').style.display = 'none';
+      const remaining = qState.waiting_count;
+      document.getElementById('qUInfo').textContent = remaining > 0 ? (remaining + ' lagi menunggu') : 'Semua telah dipanggil';
+    }
+  } else {
+    document.getElementById('qUPcBadge').style.display = 'none';
+    document.getElementById('qUInfo').textContent = 'Tekan Panggil untuk mula';
+  }
+}
+
+function qRenderUrusanList(){
+  const list = document.getElementById('qUList');
+  const rows = qState.urusan;
+  if (!rows.length) { list.innerHTML = '<div class="q-empty-state">Tambah nama untuk mula.</div>'; qUpdateUProg(); return; }
+  const curId = qState.current_urusan ? qState.current_urusan.id : null;
+  list.innerHTML = rows.map((p, i) => {
+    let rowCls = 'q-item', numCls = 'q-num', badge = '';
+    const pc = qState.pcs.find(x => x.queue_id === p.id);
+    if (p.status === 'waiting') {
+      badge = '<span class="q-badge q-b-wait">Menunggu</span>';
+    } else if (p.id === curId) {
+      rowCls += ' q-active-row'; numCls += ' q-cur';
+      badge = (pc && (pc.state === 1 || pc.state === 2)) ? ('<span class="q-badge q-b-ready">PC ' + pc.pc + '</span>') : '<span class="q-badge q-b-cur">Sekarang</span>';
+    } else {
+      rowCls += ' q-done'; badge = '<span class="q-badge q-b-done">Selesai</span>';
+    }
+    const canDel = p.status === 'waiting';
+    const pcMeta = (pc && (pc.state === 1 || pc.state === 2) && p.id !== curId) ? ('<div class="q-meta">PC ' + pc.pc + '</div>') : '';
+    return `<div class="${rowCls}">
+      <div class="${numCls}">${i+1}</div>
+      <div class="q-name-wrap"><div class="q-name">${qEsc(p.name)}</div>${pcMeta}</div>
+      ${badge}
+      ${canDel ? `<button class="q-del-btn" onclick="qDelUr(${p.id})">×</button>` : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('qUBadge').textContent = qState.waiting_count + ' menunggu';
+  qUpdateUProg();
+}
+
+function qRenderPayment(){
+  const list = document.getElementById('qPList');
+  const rows = qState.payment;
+  if (!rows.length) { list.innerHTML = '<div class="q-empty-state">Tiada dalam giliran bayar lagi.</div>'; qUpdatePProg(); return; }
+  const curId = qState.current_payment ? qState.current_payment.id : null;
+  if (qState.current_payment && qState.current_payment.id !== qLastPaymentId) {
+    qAnimateName('qPName', qState.current_payment.name);
+    qLastPaymentId = qState.current_payment.id;
+    document.getElementById('qPRepeat').disabled = false;
+    const rem = rows.filter(r => r.status === 'ready_payment').length;
+    document.getElementById('qPInfo').textContent = rem > 0 ? (rem + ' lagi menunggu bayar') : 'Terakhir!';
+  } else if (!qState.current_payment) {
+    document.getElementById('qPName').textContent = '—';
+    document.getElementById('qPInfo').textContent = 'Tiada panggilan lagi';
+    qLastPaymentId = null;
+  }
+  list.innerHTML = rows.map((p, i) => {
+    let rowCls = 'q-item', numCls = 'q-num', badge = '';
+    if (p.status === 'completed') { rowCls += ' q-done'; badge = '<span class="q-badge q-b-done">Selesai</span>'; }
+    else if (p.id === curId) { rowCls += ' q-active-row q-g'; numCls += ' q-gcur'; badge = '<span class="q-badge q-b-gcur">Sekarang</span>'; }
+    else { badge = '<span class="q-badge q-b-ready">Sedia Bayar</span>'; }
+    return `<div class="${rowCls}">
+      <div class="${numCls}">${i+1}</div>
+      <div class="q-name-wrap"><div class="q-name">${qEsc(p.name)}</div><div class="q-meta">PC ${p.pc_number||'-'}</div></div>
+      ${badge}
+    </div>`;
+  }).join('');
+  document.getElementById('qPBadge').textContent = qState.ready_payment_count + ' menunggu';
+  qUpdatePProg();
+}
+
+function qRenderPCGrid(){
+  const grid = document.getElementById('qPcGrid');
+  grid.innerHTML = qState.pcs.map(pc => {
+    let cls = 'q-pc-card', statusTxt = '', nameTxt = '', btn = '';
+    if (pc.state === 0) { statusTxt = '<div class="q-pc-status">Kosong</div>'; nameTxt = '<div class="q-pc-empty">—</div>'; }
+    else if (pc.state === 1) { cls += ' q-busy'; nameTxt = '<div class="q-pc-name">' + qEsc(pc.name) + '</div>'; statusTxt = '<div class="q-pc-status q-s-busy">Sedang Berurusan</div>'; btn = '<button class="q-pc-btn-ready" onclick="qPcReady(' + pc.pc + ')">✔ Siap</button>'; }
+    else if (pc.state === 2) { cls += ' q-ready-pay'; nameTxt = '<div class="q-pc-name">' + qEsc(pc.name) + '</div>'; statusTxt = '<div class="q-pc-status q-s-ready">Sedia Bayar</div>'; }
+    return `<div class="${cls}"><div class="q-pc-label">PC ${pc.pc}</div>${nameTxt}${statusTxt}${btn}</div>`;
+  }).join('');
+}
+
+function qRenderPCAssignBtns(){
+  [1,2,3,4].forEach(n => {
+    const btn = document.getElementById('qPcBtn'+n);
+    if (!btn) return;
+    const pc = qState.pcs.find(x => x.pc === n);
+    const busy = pc && pc.state === 1;
+    btn.disabled = busy;
+    btn.style.borderColor = busy ? '#378ADD' : '';
+    btn.style.color = busy ? '#185FA5' : '';
+  });
+}
+
+function qUpdateUBtn(){
+  const btn = document.getElementById('qUNext');
+  const hasNext = qState.has_next_urusan;
+  btn.disabled = !hasNext;
+  btn.textContent = hasNext ? '▶ Panggil Seterusnya' : '✔ Semua Dipanggil';
+}
+function qUpdatePBtn(){
+  const btn = document.getElementById('qPNext');
+  const hasNext = qState.has_next_payment;
+  btn.disabled = !hasNext;
+  btn.textContent = hasNext ? '▶ Panggil Untuk Bayar' : '✔ Semua Selesai';
+}
+function qUpdateUProg(){
+  const total = qState.urusan.length;
+  const done = qState.urusan.filter(p => p.status !== 'waiting').length;
+  document.getElementById('qUProg').textContent = done + ' / ' + total;
+  document.getElementById('qUFill').style.width = (total > 0 ? done/total*100 : 0) + '%';
+}
+function qUpdatePProg(){
+  const total = qState.payment.length;
+  const done = qState.payment.filter(p => p.status === 'completed' || (qState.current_payment && p.id === qState.current_payment.id)).length;
+  document.getElementById('qPProg').textContent = done + ' / ' + total;
+  document.getElementById('qPFill').style.width = (total > 0 ? done/total*100 : 0) + '%';
+}
+function qAnimateName(id, name){
+  const el = document.getElementById(id);
+  el.classList.remove('q-pop'); void el.offsetWidth; el.classList.add('q-pop');
+  el.textContent = name;
+}
+
+// ---------- Polling (satu timer sahaja, kurangkan kadar bila tab tidak aktif) ----------
+function qStartPolling(){
+  if (qPollTimer) return; // elak duplicate timer bila page/tab dibuka semula
+  qRefresh();
+  qPollTimer = setInterval(() => {
+    if (document.visibilityState === 'visible') qRefresh();
+  }, 1500);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') qRefresh();
+});
+// Queue init — mula polling sebaik sahaja skrip dimuatkan supaya semua device segerak.
+qStartPolling();
+
+// ===================== BOOK LOAN =====================
+let loanNfcId = null;
+let loanStep = 1;
+let loanNfcScanTimer = null;
+let loanMemberInfo = null; // {name, ic_number, kelas, category}
+
+function openLoanModal() {
+    loanNfcId = null; loanStep = 1; loanMemberInfo = null;
+    document.getElementById('loanStep1').style.display = '';
+    document.getElementById('loanStep2').style.display = 'none';
+    document.getElementById('loanNfc').value = '';
+    document.getElementById('loanNfcInfo').innerHTML = '';
+    document.getElementById('loanActionBtn').innerHTML = '<i class="fas fa-arrow-right"></i> Seterusnya';
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('loanDate').value = today;
+    document.getElementById('loanDue').value = '';
+    ['loanIc','loanKelas','loanBookNum','loanBookTitle'].forEach(id => document.getElementById(id).value = '');
+    openModal('loanModal');
+    setTimeout(() => document.getElementById('loanNfc').focus(), 200);
+}
+
+function _addOneMonth(yyyymmdd) {
+    if (!yyyymmdd) return '';
+    const d = new Date(yyyymmdd + 'T00:00:00');
+    const day = d.getDate();
+    d.setMonth(d.getMonth() + 1);
+    if (d.getDate() < day) d.setDate(0); // handle short month
+    const yy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yy}-${mm}-${dd}`;
+}
+
+async function loanCheckNfc() {
+    const nfc = document.getElementById('loanNfc').value.trim();
+    if (!nfc) { showToast('Sila tap atau taip UID kad', 'warning'); return; }
+    document.getElementById('loanNfcInfo').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyemak...';
+    try {
+        const res = await apiPost('book_loan_check_nfc', { nfc_id:nfc });
+        const data = await res.json();
+        if (data.success) {
+            loanNfcId = nfc;
+            loanMemberInfo = { name: data.member.name, ic_number: data.member.ic_number || '', kelas: data.member.kelas || '', category: data.member.category };
+            document.getElementById('loanNfcInfo').innerHTML = `<span style="color:#059669"><strong><i class="fas fa-id-card"></i> ${data.member.name}</strong> (${data.member.category}) — Kad dikenali ✔</span>`;
+        } else {
+            loanNfcId = null; loanMemberInfo = null;
+            document.getElementById('loanNfcInfo').innerHTML = `<span style="color:red"><i class="fas fa-circle-xmark"></i> ${data.message}</span>`;
+        }
+    } catch(e) {
+        document.getElementById('loanNfcInfo').innerHTML = '<span style="color:red">Ralat sambungan</span>';
+    }
+}
+
+// Auto-scan for loan NFC: trigger after short pause (NFC reader sends Enter)
+document.getElementById('loanNfc').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); loanCheckNfc(); }
+});
+document.getElementById('loanNfc').addEventListener('input', function() {
+    clearTimeout(loanNfcScanTimer);
+    loanNfcScanTimer = setTimeout(() => {
+        if (document.getElementById('loanNfc').value.trim().length > 2) loanCheckNfc();
+    }, 350);
+});
+
+async function handleLoanAction() {
+    if (loanStep === 1) {
+        if (!loanNfcId) {
+            // Try to check NFC once more if there's a value
+            const nfcVal = document.getElementById('loanNfc').value.trim();
+            if (nfcVal) {
+                await loanCheckNfc();
+                if (!loanNfcId) { showToast('Kad tidak dikenali. Sila tap semula.', 'error'); return; }
+            } else {
+                showToast('Sila tap kad dahulu', 'warning'); return;
+            }
+        }
+        // Auto-fill maklumat ahli & due date (+1 bulan)
+        if (loanMemberInfo) {
+            if (loanMemberInfo.ic_number && !document.getElementById('loanIc').value.trim()) {
+                document.getElementById('loanIc').value = loanMemberInfo.ic_number;
+            }
+            if (loanMemberInfo.kelas && !document.getElementById('loanKelas').value.trim()) {
+                document.getElementById('loanKelas').value = loanMemberInfo.kelas;
+            }
+        }
+        const loanDateEl = document.getElementById('loanDate');
+        if (!loanDateEl.value) loanDateEl.value = new Date().toISOString().split('T')[0];
+        const dueEl = document.getElementById('loanDue');
+        if (!dueEl.value) dueEl.value = _addOneMonth(loanDateEl.value);
+        document.getElementById('loanStep1').style.display = 'none';
+        document.getElementById('loanStep2').style.display = '';
+        document.getElementById('loanActionBtn').innerHTML = '<i class="fas fa-save"></i> Simpan Pinjaman';
+        loanStep = 2;
+    } else {
+        const ic = document.getElementById('loanIc').value.trim();
+        const kelas = document.getElementById('loanKelas').value.trim();
+        const bookNum = document.getElementById('loanBookNum').value.trim();
+        const bookTitle = document.getElementById('loanBookTitle').value.trim();
+        const loanDate = document.getElementById('loanDate').value;
+        const dueDate = document.getElementById('loanDue').value;
+        if (!bookNum || !bookTitle || !loanDate || !dueDate) {
+            showToast('Sila isi nombor buku, tajuk, tarikh pinjam dan tarikh limit', 'error'); return;
+        }
+        try {
+            const res = await apiPost('book_loan_borrow', { nfc_id:loanNfcId, ic_number:ic, kelas, book_number:bookNum, book_title:bookTitle, loan_date:loanDate, due_date:dueDate });
+            const data = await res.json();
+            showToast(data.message, data.success ? 'success' : 'error');
+            if (data.success) closeModal('loanModal');
+        } catch(e) { showToast('Ralat sambungan server', 'error'); }
+    }
+}
+
+// ===================== BOOK RETURN =====================
+let returnLoans = [];
+let selectedLoanId = null;
+let returnNfcScanTimer = null;
+
+function openReturnModal() {
+    returnLoans = []; selectedLoanId = null;
+    document.getElementById('returnStep1').style.display = '';
+    document.getElementById('returnStep2').style.display = 'none';
+    document.getElementById('returnNfc').value = '';
+    document.getElementById('returnIcInput').value = '';
+    document.getElementById('returnNfcInfo').innerHTML = '';
+    document.getElementById('returnLoanList').innerHTML = '';
+    document.getElementById('returnActionArea').innerHTML = '';
+    document.getElementById('returnScanBtn').style.display = '';
+    // Reset to NFC tab
+    switchReturnTab('nfc');
+    openModal('returnModal');
+    setTimeout(() => document.getElementById('returnNfc').focus(), 200);
+}
+
+document.getElementById('returnNfc').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); doReturnScan(); }
+});
+document.getElementById('returnNfc').addEventListener('input', function() {
+    clearTimeout(returnNfcScanTimer);
+    returnNfcScanTimer = setTimeout(() => {
+        if (document.getElementById('returnNfc').value.trim().length > 2) doReturnScan();
+    }, 350);
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const retIcEl = document.getElementById('returnIcInput');
+    if (retIcEl) {
+        retIcEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); doReturnScanIc(); }
+        });
+    }
+});
+
+function switchReturnTab(mode) {
+    document.getElementById('returnTabNfc').className = 'tab-btn' + (mode==='nfc' ? ' active' : '');
+    document.getElementById('returnTabIc').className = 'tab-btn' + (mode==='ic' ? ' active' : '');
+    document.getElementById('returnNfcTab').style.display = mode==='nfc' ? '' : 'none';
+    document.getElementById('returnIcTab').style.display = mode==='ic' ? '' : 'none';
+    document.getElementById('returnNfcInfo').innerHTML = '';
+    if (mode==='ic') setTimeout(() => document.getElementById('returnIcInput').focus(), 100);
+    else setTimeout(() => document.getElementById('returnNfc').focus(), 100);
+}
+
+async function doReturnScanIc() {
+    const ic = document.getElementById('returnIcInput').value.trim();
+    if (!ic) { showToast('Sila masukkan No. IC', 'warning'); return; }
+    document.getElementById('returnNfcInfo').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyemak pinjaman...';
+    try {
+        const res = await apiPost('book_loan_check_return', { ic_number: ic });
+        const data = await res.json();
+        if (!data.success) {
+            document.getElementById('returnNfcInfo').innerHTML = `<span style="color:red"><i class="fas fa-circle-xmark"></i> ${data.message}</span>`;
+            return;
+        }
+        returnLoans = data.loans;
+        document.getElementById('returnNfcInfo').innerHTML = `<span style="color:#059669"><strong><i class="fas fa-id-card"></i> ${data.member_name}</strong> — ${returnLoans.length} pinjaman aktif ditemui ✔</span>`;
+        document.getElementById('returnStep1').style.display = 'none';
+        document.getElementById('returnStep2').style.display = '';
+        document.getElementById('returnScanBtn').style.display = 'none';
+        selectedLoanId = returnLoans[0].id;
+        renderReturnLoans();
+    } catch(e) {
+        document.getElementById('returnNfcInfo').innerHTML = '<span style="color:red">Ralat sambungan server</span>';
+    }
+}
+
+async function doReturnScan() {
+    const nfc = document.getElementById('returnNfc').value.trim();
+    if (!nfc) { showToast('Sila tap atau taip UID kad', 'warning'); return; }
+    document.getElementById('returnNfcInfo').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyemak pinjaman...';
+    try {
+        const res = await apiPost('book_loan_check_return', { nfc_id:nfc });
+        const data = await res.json();
+        if (!data.success) {
+            document.getElementById('returnNfcInfo').innerHTML = `<span style="color:red"><i class="fas fa-circle-xmark"></i> ${data.message}</span>`;
+            return;
+        }
+        returnLoans = data.loans;
+        document.getElementById('returnNfcInfo').innerHTML = `<span style="color:#059669"><strong><i class="fas fa-id-card"></i> ${data.member_name}</strong> — ${returnLoans.length} pinjaman aktif ditemui ✔</span>`;
+        document.getElementById('returnStep1').style.display = 'none';
+        document.getElementById('returnStep2').style.display = '';
+        document.getElementById('returnScanBtn').style.display = 'none';
+        selectedLoanId = returnLoans[0].id;
+        renderReturnLoans();
+    } catch(e) {
+        document.getElementById('returnNfcInfo').innerHTML = '<span style="color:red">Ralat sambungan server</span>';
+    }
+}
+function renderReturnLoans() {
+    const container = document.getElementById('returnLoanList');
+    container.innerHTML = returnLoans.map(l => {
+        const lateLabel = l.days_late > 0 ? `<span style="color:#dc2626;font-weight:600"> ⚠ Lewat ${l.days_late} hari (RM ${l.auto_fine.toFixed(2)})</span>` : '<span style="color:#059669"> ✔ Dalam Tempoh</span>';
+        const sel = selectedLoanId === l.id ? 'border:2px solid var(--accent);background:#e0f7ff;' : '';
+        return `<div onclick="selectLoan(${l.id})" style="cursor:pointer;padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);margin-bottom:8px;${sel}">
+            <div style="font-weight:700">${l.book_title} <span style="font-size:0.8rem;color:var(--text-muted)">[${l.book_number}]</span></div>
+            <div style="font-size:0.8rem;color:var(--text-muted)">Pinjam: ${l.loan_date} | Due: ${l.due_date} ${lateLabel}</div>
+        </div>`;
+    }).join('');
+    if (!selectedLoanId && returnLoans.length > 0) { selectedLoanId = returnLoans[0].id; renderReturnLoans(); return; }
+    renderReturnActions();
+}
+function selectLoan(id) { selectedLoanId = id; renderReturnLoans(); }
+function renderReturnActions() {
+    const loan = returnLoans.find(l => l.id === selectedLoanId);
+    if (!loan) return;
+    const lateSection = loan.days_late > 0 ? `
+        <div style="background:#fff5f5;border-radius:8px;padding:10px 14px;margin-bottom:10px;border:1px solid #fecaca">
+            <div style="font-weight:700;color:#dc2626;font-size:0.9rem"><i class="fas fa-exclamation-triangle"></i> Buku Lewat ${loan.days_late} hari — Denda RM ${loan.auto_fine.toFixed(2)}</div>
+            <div style="font-size:0.8rem;color:#64748b;margin-top:4px">Tekan <b>"Buku Ada (Lewat)"</b> untuk proses bayaran denda dengan kad atau tunai</div>
+        </div>` : '';
+    const adaLabel = loan.days_late > 0 ? 'Buku Ada — Bayar Denda' : 'Buku Ada (Pulang Buku)';
+    const adaOnclick = loan.days_late > 0
+        ? `openFinePayModal({id:${loan.id},book_title:'${loan.book_title.replace(/'/g,"\\'")}',days_left:${-loan.days_late},fine:${loan.auto_fine}})`
+        : `processReturn(${loan.id},'ada')`;
+    document.getElementById('returnActionArea').innerHTML = `
+        <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;margin-bottom:10px">
+            <div style="font-weight:700;margin-bottom:8px;color:var(--primary)"><i class="fas fa-book"></i> Tindakan untuk: ${loan.book_title}</div>
+            ${lateSection}
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-success btn-sm" onclick="${adaOnclick}"><i class="fas fa-check"></i> ${adaLabel}</button>
+                <button class="btn btn-danger btn-sm" onclick="showFineInput(${loan.id},'tiada')"><i class="fas fa-times"></i> Buku Hilang/Rosak (Bayar Denda)</button>
+                <button class="btn btn-warning btn-sm" onclick="showExtendInput(${loan.id})"><i class="fas fa-calendar-plus"></i> Lanjut Tempoh</button>
+            </div>
+        </div>
+        <div id="returnExtraInput"></div>`;
+}
+async function processReturn(loanId, action, extraData = {}) {
+    const payload = { loan_id: loanId, action, ...extraData };
+    const res = await apiPost('book_loan_return', payload);
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) { closeModal('returnModal'); loadActiveLoans(); }
+}
+function showFineInput(loanId, action) {
+    document.getElementById('returnExtraInput').innerHTML = `
+        <div style="background:#fff5f5;border-radius:10px;padding:12px 16px;border:1px solid #fecaca">
+            <label style="font-size:0.82rem;font-weight:600;color:var(--danger)">Tetapkan Harga Ganti Rugi (RM)</label>
+            <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+                <input type="number" id="returnFineAmount" step="0.01" min="0" placeholder="0.00" style="flex:1;min-width:120px;padding:10px 14px;border-radius:8px;border:1.5px solid var(--border)">
+                <select id="returnFineMethod" onchange="toggleReturnFineKad()" style="padding:10px 14px;border-radius:8px;border:1.5px solid var(--border);font-family:inherit">
+                    <option value="tunai">Tunai</option>
+                    <option value="kad">Kad (Tolak Point)</option>
+                </select>
+            </div>
+            <div id="returnFineKadRow" style="display:none;margin-top:8px">
+                <input type="text" id="returnFineNfc" placeholder="Tap kad NFC untuk bayar..." style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid var(--border)">
+                <div id="returnFineNfcInfo" style="font-size:0.8rem;margin-top:4px;color:#64748b"></div>
+            </div>
+            <div style="margin-top:10px">
+                <button class="btn btn-danger btn-sm" onclick="submitFineWithMethod(${loanId},'${action}')"><i class="fas fa-check"></i> Sahkan Ganti Rugi</button>
+            </div>
+        </div>`;
+    // Setup NFC listener for fine kad
+    setTimeout(() => {
+        const nfcEl = document.getElementById('returnFineNfc');
+        if (!nfcEl) return;
+        let t = null;
+        nfcEl.addEventListener('input', function() {
+            clearTimeout(t);
+            if (this.value.trim().length > 2) t = setTimeout(() => fetchReturnFineNfc(this.value.trim()), 350);
+        });
+        nfcEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); fetchReturnFineNfc(this.value.trim()); }
+        });
+    }, 100);
+}
+function toggleReturnFineKad() {
+    const method = document.getElementById('returnFineMethod').value;
+    const row = document.getElementById('returnFineKadRow');
+    if (row) row.style.display = method === 'kad' ? '' : 'none';
+}
+let returnFineMember = null;
+async function fetchReturnFineNfc(nfcId) {
+    const res = await apiPost('get_member_by_nfc', { nfc_id:nfcId });
+    const data = await res.json();
+    const infoEl = document.getElementById('returnFineNfcInfo');
+    if (!infoEl) return;
+    if (data.success && data.member) {
+        returnFineMember = data.member;
+        infoEl.innerHTML = `<span style="color:#059669"><strong>${data.member.name}</strong> — ${data.member.points} pt (RM ${(data.member.points/100).toFixed(2)})</span>`;
+    } else {
+        returnFineMember = null;
+        infoEl.innerHTML = '<span style="color:red">Kad tidak dikenali</span>';
+    }
+}
+async function submitFineWithMethod(loanId, action) {
+    const fine = parseFloat(document.getElementById('returnFineAmount').value) || 0;
+    const method = document.getElementById('returnFineMethod') ? document.getElementById('returnFineMethod').value : 'tunai';
+    if (method === 'kad') {
+        const nfcId = document.getElementById('returnFineNfc') ? document.getElementById('returnFineNfc').value.trim() : '';
+        if (!nfcId) { showToast('Sila tap kad untuk bayar dengan kad', 'warning'); return; }
+        const payload = { loan_id: loanId, method: 'kad', fine_amount: fine, nfc_id: nfcId };
+        const res = await apiPost('book_loan_pay_fine', payload);
+        const data = await res.json();
+        if (data.success && action === 'tiada') {
+            await apiPost('book_loan_return', {loan_id:loanId, action:'tiada', fine_amount:fine});
+        }
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) { closeModal('returnModal'); loadActiveLoans(); loadMembers(); loadLeaderboard(); }
+    } else {
+        await processReturn(loanId, action, { fine_amount: fine });
+        loadActiveLoans();
+    }
+}
+async function submitFine(loanId, action) {
+    const fine = parseFloat(document.getElementById('returnFineAmount').value) || 0;
+    await processReturn(loanId, action, { fine_amount: fine });
+    loadActiveLoans();
+}
+function showExtendInput(loanId) {
+    document.getElementById('returnExtraInput').innerHTML = `
+        <div style="background:#f0fdf4;border-radius:10px;padding:12px 16px;border:1px solid #bbf7d0">
+            <label style="font-size:0.82rem;font-weight:600;color:#059669">Tarikh Lanjutan Baru</label>
+            <div style="display:flex;gap:10px;margin-top:8px">
+                <input type="date" id="returnExtendDate" style="flex:1;padding:10px 14px;border-radius:8px;border:1.5px solid var(--border)">
+                <button class="btn btn-success btn-sm" onclick="submitExtend(${loanId})"><i class="fas fa-check"></i> Lanjutkan</button>
+            </div>
+        </div>`;
+}
+async function submitExtend(loanId) {
+    const extDate = document.getElementById('returnExtendDate').value;
+    if (!extDate) { showToast('Sila pilih tarikh lanjutan', 'error'); return; }
+    await processReturn(loanId, 'lanjut', { extend_date: extDate });
+}
+
+// ===================== ACTIVE LOANS (DASHBOARD) =====================
+async function loadActiveLoans() {
+    try {
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        const monthDisplay = now.toLocaleString('ms-MY', {month:'long', year:'numeric'});
+        const labelEl = document.getElementById('activeLoanMonthLabel');
+        if (labelEl) labelEl.textContent = `— ${monthDisplay}`;
+        const res = await apiGet('book_loan_active_loans');
+        const allLoans = await res.json();
+        // Filter hanya buku yang dipinjam bulan ini
+        const loans = allLoans.filter(l => l.loan_date && l.loan_date.startsWith(currentMonth));
+        const container = document.getElementById('activeLoansList');
+        if (!loans.length) { container.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);text-align:center;padding:8px">Tiada buku dipinjam bulan ini</div>'; return; }
+        container.innerHTML = loans.map(l => {
+            const isLate = l.is_late;
+            const borderColor = isLate ? '#dc2626' : '#10b981';
+            const statusText = isLate
+                ? `<span style="color:#dc2626;font-weight:700;font-size:0.75rem">⚠ Lewat ${Math.abs(l.days_left)} hari | Denda RM${l.fine.toFixed(2)}</span>`
+                : `<span style="color:#059669;font-size:0.75rem">Tamat: ${l.due_date} (${l.days_left} hari lagi)</span>`;
+            return `<div style="padding:8px 10px;border-radius:8px;border-left:3px solid ${borderColor};background:${isLate?'#fff5f5':'#f0fdf4'};margin-bottom:7px">
+                <div style="font-weight:700;font-size:0.85rem">${l.borrower_name}${l.kelas ? ' <span style="font-weight:400;font-size:0.75rem;color:#64748b">('+l.kelas+')</span>' : ''}</div>
+                <div style="font-size:0.78rem;color:#64748b;margin-top:1px">${l.book_title}</div>
+                ${statusText}
+            </div>`;
+        }).join('');
+    } catch(e) { console.error(e); }
+}
+
+// ===================== TOP BORROWERS (DASHBOARD) =====================
+async function loadTopBorrowers() {
+    try {
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        const monthDisplay = now.toLocaleString('ms-MY', {month:'long', year:'numeric'});
+        const labelEl = document.getElementById('topBorrowerMonthLabel');
+        if (labelEl) labelEl.textContent = `— ${monthDisplay}`;
+        const res = await apiGet('book_loan_top_borrowers', { month: currentMonth });
+        const data = await res.json();
+        const container = document.getElementById('topBorrowersList');
+        if (!data.length) { container.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);text-align:center;padding:8px">Tiada data pinjaman bulan ini</div>'; return; }
+        const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+        container.innerHTML = data.map((item, idx) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+                <span style="font-size:1rem;width:28px">${medals[idx]||''}</span>
+                <span style="flex:1;font-weight:600;font-size:0.87rem">${item.name}<br><span style="font-weight:400;font-size:0.75rem;color:#64748b">${item.kelas}</span></span>
+                <span style="font-weight:700;color:var(--primary);font-size:0.88rem">${item.total} buku</span>
+            </div>`).join('');
+    } catch(e) { console.error(e); }
+}
+
+// ===================== FINE PAYMENT =====================
+let fineLoanData = null;
+let finePayMember = null;
+
+function openFinePayModal(loan) {
+    fineLoanData = loan;
+    finePayMember = null;
+    document.getElementById('fineLoanId').value = loan.id;
+    document.getElementById('fineLoanInfo').textContent = `"${loan.book_title}" — Lewat ${Math.abs(loan.days_left)} hari`;
+    document.getElementById('fineDendaAmt').textContent = `Denda: RM ${loan.fine.toFixed(2)}`;
+    document.getElementById('finePayNfc').value = '';
+    document.getElementById('finePayMemberInfo').innerHTML = '';
+    document.getElementById('finePayMethod').value = 'kad';
+    document.getElementById('fineKadSection').style.display = '';
+    document.getElementById('fineTunaiSection').style.display = 'none';
+    openModal('finePayModal');
+    setTimeout(() => document.getElementById('finePayNfc').focus(), 200);
+}
+
+function toggleFinePayMethod() {
+    const method = document.getElementById('finePayMethod').value;
+    document.getElementById('fineKadSection').style.display = method === 'kad' ? '' : 'none';
+    document.getElementById('fineTunaiSection').style.display = method === 'tunai' ? '' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const fineNfcInput = document.getElementById('finePayNfc');
+    if (fineNfcInput) {
+        let fineNfcTimer = null;
+        fineNfcInput.addEventListener('keydown', async function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); await fetchFinePayMember(this.value.trim()); }
+        });
+        fineNfcInput.addEventListener('input', function() {
+            clearTimeout(fineNfcTimer);
+            fineNfcTimer = setTimeout(() => { if (this.value.trim().length > 2) fetchFinePayMember(this.value.trim()); }, 350);
+        });
+    }
+});
+
+async function fetchFinePayMember(nfcId) {
+    if (!nfcId) return;
+    const res = await apiPost('get_member_by_nfc', { nfc_id:nfcId });
+    const data = await res.json();
+    if (data.success && data.member) {
+        finePayMember = data.member;
+        const fine = fineLoanData ? fineLoanData.fine : 0;
+        const ptNeeded = Math.round(fine * 100);
+        const enough = data.member.points >= ptNeeded;
+        document.getElementById('finePayMemberInfo').innerHTML = `<strong><i class="fas fa-id-card"></i> ${data.member.name}</strong><br>
+            Point: ${data.member.points} pt (RM ${(data.member.points/100).toFixed(2)}) — 
+            ${enough ? '<span style="color:#059669">✔ Mencukupi</span>' : '<span style="color:#dc2626">✘ Tidak mencukupi, guna tunai</span>'}`;
+    } else {
+        finePayMember = null;
+        document.getElementById('finePayMemberInfo').innerHTML = '<span style="color:red">Kad tidak dikenali</span>';
+    }
+}
+
+async function submitFinePay() {
+    const loanId = document.getElementById('fineLoanId').value;
+    const method = document.getElementById('finePayMethod').value;
+    const fine = fineLoanData ? fineLoanData.fine : 0;
+    if (!loanId || fine <= 0) { showToast('Data tidak lengkap', 'error'); return; }
+    if (method === 'kad' && !finePayMember) { showToast('Sila tap kad ahli dahulu', 'warning'); return; }
+    const payload = {
+        loan_id: parseInt(loanId),
+        method,
+        fine_amount: fine,
+        nfc_id: method === 'kad' && finePayMember ? finePayMember.nfc_id || document.getElementById('finePayNfc').value.trim() : ''
+    };
+    // need nfc_id for kad, get it from input
+    if (method === 'kad') payload.nfc_id = document.getElementById('finePayNfc').value.trim();
+    const res = await apiPost('book_loan_pay_fine', payload);
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) {
+        closeModal('finePayModal');
+        closeModal('returnModal');
+        loadActiveLoans();
+        if (method === 'kad') { loadMembers(); loadLeaderboard(); }
+    }
+}
+
+
+// ===================== SENARAI AHLI - add ic_number to renderMembers =====================
+// (Patched in renderMembers below)
+
+// ===================== BULK REGISTER =====================
+let bulkRows = [];
+
+function openBulkRegisterModal() {
+    bulkRows = [];
+    document.getElementById('bulkExcelFile').value = '';
+    document.getElementById('bulkBatch').value = '';
+    document.getElementById('bulkExpiry').value = '';
+    document.getElementById('bulkPreview').style.display = 'none';
+    document.getElementById('bulkPreviewCount').textContent = '';
+    document.getElementById('bulkPreviewBody').innerHTML = '';
+    openModal('bulkRegisterModal');
+}
+
+async function previewBulkExcel() {
+    const file = document.getElementById('bulkExcelFile').files[0];
+    if (!file) return;
+    try {
+        const data = await file.arrayBuffer();
+        // Parse Excel using SheetJS via CDN — load dynamically if needed
+        let XLSX;
+        if (window.XLSX) {
+            XLSX = window.XLSX;
+        } else {
+            await new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                s.onload = res; s.onerror = rej;
+                document.head.appendChild(s);
+            });
+            XLSX = window.XLSX;
+        }
+        const wb = XLSX.read(data, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        // Skip first row (header), read kelas|nama|no ic
+        bulkRows = [];
+        for (let i = 1; i < raw.length; i++) {
+            const row = raw[i];
+            const kelas = (row[0] || '').toString().trim();
+            const name = (row[1] || '').toString().trim();
+            const ic = (row[2] || '').toString().trim();
+            if (name) bulkRows.push({kelas, name, ic_number: ic});
+        }
+        const tbody = document.getElementById('bulkPreviewBody');
+        tbody.innerHTML = bulkRows.slice(0, 20).map(r =>
+            `<tr><td style="padding:6px 8px;border-bottom:1px solid var(--border)">${r.kelas}</td><td style="padding:6px 8px;border-bottom:1px solid var(--border)">${r.name}</td><td style="padding:6px 8px;border-bottom:1px solid var(--border)">${r.ic_number}</td></tr>`
+        ).join('');
+        document.getElementById('bulkPreview').style.display = '';
+        document.getElementById('bulkPreviewCount').textContent = `Dijumpai: ${bulkRows.length} rekod${bulkRows.length > 20 ? ' (menunjukkan 20 pertama)' : ''}`;
+    } catch(e) {
+        showToast('Gagal baca Excel: ' + e.message, 'error');
+    }
+}
+
+async function submitBulkRegister() {
+    if (!bulkRows.length) { showToast('Sila upload fail Excel dahulu', 'warning'); return; }
+    const batch = document.getElementById('bulkBatch').value.trim();
+    const category = document.getElementById('bulkCategory').value;
+    const expiry_date = document.getElementById('bulkExpiry').value || null;
+    try {
+        const res = await apiPost('bulk_register', {rows: bulkRows, batch, category, expiry_date});
+        const data = await res.json();
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) { closeModal('bulkRegisterModal'); loadMembers(); }
+    } catch(e) { showToast('Ralat sambungan', 'error'); }
+}
+
+// ===================== ASSIGN NFC (SETKAN SEBAGAI AHLI) — ENHANCED =====================
+let _assignFoundMember = null; // cache data ahli yang telah dikenali
+
+function openAssignNfcModal() {
+    _assignFoundMember = null;
+    document.getElementById('assignIc').value = '';
+    document.getElementById('assignNfcLookup').value = '';
+    document.getElementById('assignNfcInput').value = '';
+    document.getElementById('assignNfcScanStatus').textContent = '';
+    document.getElementById('assignBatch').value = '';
+    document.getElementById('assignBatchB').value = '';
+    document.getElementById('assignKelas').value = '';
+    document.getElementById('assignKelasB').value = '';
+    document.getElementById('assignExpiry').value = '';
+    document.getElementById('assignMemberInfo').innerHTML = '';
+    document.getElementById('assignCategory').value = 'ahli';
+    document.getElementById('assignKategoriPerananGroup').style.display = 'none';
+    document.getElementById('assignAhliKelasGroup').style.display = '';
+    document.getElementById('assignBertugasKelasGroup').style.display = 'none';
+    document.getElementById('assignKategoriPeranan') && (document.getElementById('assignKategoriPeranan').value = 'pelajar');
+    switchAssignTab('ic');
+    openModal('assignNfcModal');
+    setTimeout(() => document.getElementById('assignIc').focus(), 200);
+}
+
+function switchAssignTab(mode) {
+    document.getElementById('assignTabIcBtn').className = 'tab-btn' + (mode==='ic'?' active':'');
+    document.getElementById('assignTabNfcBtn').className = 'tab-btn' + (mode==='nfc'?' active':'');
+    document.getElementById('assignTabIc').style.display = mode==='ic' ? '' : 'none';
+    document.getElementById('assignTabNfc').style.display = mode==='nfc' ? '' : 'none';
+    if (mode === 'nfc') setTimeout(() => document.getElementById('assignNfcLookup').focus(), 100);
+    else setTimeout(() => document.getElementById('assignIc').focus(), 100);
+}
+
+// Populate form with recognised member data
+function _populateAssignForm(m) {
+    _assignFoundMember = m;
+    const hasNfc = m.nfc_id && !m.nfc_id.startsWith('BULK_');
+    const el = document.getElementById('assignMemberInfo');
+
+    // Determine label
+    const rl = (m.kategori_peranan || m.category || '').toLowerCase();
+    let katLabel = 'Pelajar';
+    if (rl === 'guru') katLabel = 'Guru';
+    else if (rl === 'akp') katLabel = 'AKP';
+
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px">
+        <span style="color:#059669;font-weight:700"><i class="fas fa-user-check"></i> ${m.name}</span>
+        <span style="font-size:0.82rem;color:#334155">
+            IC: <b>${m.ic_number||'—'}</b> &nbsp;|&nbsp;
+            Batch: <b>${m.batch||'—'}</b> &nbsp;|&nbsp;
+            Kelas: <b>${m.kelas||'—'}</b> &nbsp;|&nbsp;
+            Peranan: <b>${katLabel}</b>
+        </span>
+        ${hasNfc ? '<span style="color:#d97706;font-size:0.8rem">⚠ Sudah ada NFC, akan digantikan</span>' : '<span style="color:#10b981;font-size:0.8rem">✔ Belum ada NFC</span>'}
+    </div>`;
+
+    // Auto-fill IC
+    if (m.ic_number) document.getElementById('assignIc').value = m.ic_number;
+
+    // Auto-fill batch
+    if (m.batch) {
+        document.getElementById('assignBatch').value = m.batch;
+        document.getElementById('assignBatchB').value = m.batch;
+    }
+
+    // Auto-fill kelas
+    const kelasFill = (m.kelas || '').trim();
+    const katPeranan = (m.kategori_peranan || '').toLowerCase();
+
+    if (katPeranan === 'guru' || katPeranan === 'akp') {
+        // Guru/AKP — auto set kategori bertugas dan peranan
+        document.getElementById('assignCategory').value = 'bertugas';
+        onAssignCategoryChange(false); // update UI without clearing
+        document.getElementById('assignKategoriPeranan').value = katPeranan;
+        onAssignKategoriPerananChange(false);
+    } else {
+        // Pelajar — fill kelas
+        if (kelasFill && kelasFill.toLowerCase() !== 'guru' && kelasFill.toLowerCase() !== 'akp') {
+            document.getElementById('assignKelas').value = kelasFill;
+            document.getElementById('assignKelasB').value = kelasFill;
+        }
+    }
+}
+
+async function assignCheckIc() {
+    const ic = document.getElementById('assignIc').value.trim();
+    if (!ic) { showToast('Sila masukkan No. IC', 'warning'); return; }
+    const el = document.getElementById('assignMemberInfo');
+    el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mencari...';
+    try {
+        const res = await apiPost('find_by_ic', {ic_number:ic});
+        const data = await res.json();
+        if (data.success && data.member) {
+            _populateAssignForm(data.member);
+        } else {
+            _assignFoundMember = null;
+            el.innerHTML = `<span style="color:#dc2626"><i class="fas fa-circle-xmark"></i> ${data.message}</span>`;
+        }
+    } catch(e) {
+        el.innerHTML = '<span style="color:red">Ralat sambungan</span>';
+    }
+}
+
+// Lookup NFC untuk KENALI ahli (bukan untuk tetapkan)
+async function _assignLookupNfc(nfcId) {
+    if (!nfcId || nfcId.length < 3) return;
+    const el = document.getElementById('assignMemberInfo');
+    el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengenal pasti ahli...';
+    try {
+        const res = await apiPost('find_by_nfc_assign', {nfc_id:nfcId});
+        const data = await res.json();
+        if (data.success && data.member) {
+            _populateAssignForm(data.member);
+            // Jika tab NFC lookup: clear field dan cadangkan guna NFC baru di field bawah
+            if (document.getElementById('assignTabNfc').style.display !== 'none') {
+                showToast(`Ahli dikenali: ${data.member.name}`, 'success');
+                document.getElementById('assignNfcInput').focus();
+            }
+        } else {
+            _assignFoundMember = null;
+            el.innerHTML = `<span style="color:#64748b"><i class="fas fa-info-circle"></i> UID ini tidak didaftarkan lagi — sila isi maklumat manual</span>`;
+        }
+    } catch(e) {
+        el.innerHTML = '<span style="color:red">Ralat sambungan</span>';
+    }
+}
+
+function onAssignCategoryChange(clearFields=true) {
+    const cat = document.getElementById('assignCategory').value;
+    if (cat === 'bertugas') {
+        document.getElementById('assignKategoriPerananGroup').style.display = '';
+        document.getElementById('assignAhliKelasGroup').style.display = 'none';
+        // Tunjuk kelas bertugas hanya untuk pelajar
+        const peranan = document.getElementById('assignKategoriPeranan').value;
+        document.getElementById('assignBertugasKelasGroup').style.display = (peranan === 'pelajar') ? '' : 'none';
+    } else {
+        // Ahli Mengumpul Point — tunjuk kelas+batch
+        document.getElementById('assignKategoriPerananGroup').style.display = 'none';
+        document.getElementById('assignAhliKelasGroup').style.display = '';
+        document.getElementById('assignBertugasKelasGroup').style.display = 'none';
+    }
+}
+
+function onAssignKategoriPerananChange(clearKelas=true) {
+    const peranan = document.getElementById('assignKategoriPeranan').value;
+    const rl = peranan.toLowerCase();
+    if (rl === 'guru' || rl === 'akp') {
+        document.getElementById('assignBertugasKelasGroup').style.display = 'none';
+    } else {
+        // Pelajar — perlu kelas & batch
+        document.getElementById('assignBertugasKelasGroup').style.display = '';
+        // Auto-fill dari data ahli jika ada
+        if (_assignFoundMember && _assignFoundMember.kelas && !document.getElementById('assignKelasB').value) {
+            const k = _assignFoundMember.kelas;
+            if (k.toLowerCase() !== 'guru' && k.toLowerCase() !== 'akp') {
+                document.getElementById('assignKelasB').value = k;
+            }
+        }
+    }
+}
+
+// Listeners untuk NFC assign
+document.addEventListener('DOMContentLoaded', function() {
+    // NFC Lookup field (tab NFC — untuk kenali ahli)
+    const lookupEl = document.getElementById('assignNfcLookup');
+    if (lookupEl) {
+        let t1 = null;
+        lookupEl.addEventListener('input', function() {
+            clearTimeout(t1);
+            t1 = setTimeout(() => { if (this.value.trim().length > 2) _assignLookupNfc(this.value.trim()); }, 350);
+        });
+        lookupEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); _assignLookupNfc(this.value.trim()); }
+        });
+    }
+
+    // NFC Input (kad yang akan ditetapkan)
+    const assignNfcEl = document.getElementById('assignNfcInput');
+    if (assignNfcEl) {
+        let t2 = null;
+        assignNfcEl.addEventListener('input', function() {
+            clearTimeout(t2);
+            const st = document.getElementById('assignNfcScanStatus');
+            t2 = setTimeout(() => {
+                if (this.value.trim().length > 2) {
+                    if (st) st.innerHTML = '<span style="color:#059669"><i class="fas fa-check-circle"></i> Kad diimbas — sedia untuk ditetapkan</span>';
+                } else {
+                    if (st) st.textContent = '';
+                }
+            }, 350);
+        });
+        assignNfcEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); submitAssignNfc(); }
+        });
+    }
+
+    // IC input enter key
+    const icEl = document.getElementById('assignIc');
+    if (icEl) {
+        icEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); assignCheckIc(); }
+        });
+    }
+});
+
+// Legacy: toggleAssignRole dipanggil dari elemen lama — kekalkan untuk keserasian
+function toggleAssignRole() { onAssignCategoryChange(); }
+
+async function submitAssignNfc() {
+    const ic_number = document.getElementById('assignIc').value.trim();
+    const nfc_id = document.getElementById('assignNfcInput').value.trim();
+    const category = document.getElementById('assignCategory').value;
+    const expiry_date = document.getElementById('assignExpiry').value || null;
+
+    if (!ic_number) { showToast('Sila masukkan No. IC dahulu', 'warning'); return; }
+    if (!nfc_id) { showToast('Sila tap kad NFC yang akan ditetapkan', 'warning'); return; }
+
+    // Determine kelas, batch, kategori_peranan
+    let kelas = null, batch = null, kategori_peranan = 'pelajar';
+
+    if (category === 'ahli') {
+        kelas = document.getElementById('assignKelas').value.trim() || null;
+        batch = document.getElementById('assignBatch').value.trim() || null;
+        kategori_peranan = 'pelajar';
+    } else {
+        // bertugas
+        const peranan = document.getElementById('assignKategoriPeranan').value;
+        kategori_peranan = peranan;
+        if (peranan === 'guru') {
+            kelas = 'guru';
+            batch = document.getElementById('assignBatch').value.trim() || null;
+        } else if (peranan === 'akp') {
+            kelas = 'akp';
+            batch = document.getElementById('assignBatch').value.trim() || null;
+        } else {
+            // pelajar bertugas
+            kelas = document.getElementById('assignKelasB').value.trim() || null;
+            batch = document.getElementById('assignBatchB').value.trim() || null;
+        }
+    }
+
+    try {
+        const res = await apiPost('assign_nfc', { ic_number, nfc_id, kelas, batch, category, expiry_date, kategori_peranan });
+        const data = await res.json();
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) { closeModal('assignNfcModal'); loadMembers(); }
+    } catch(e) { showToast('Ralat sambungan', 'error'); }
+}
+
+// ===================== LOAN TAB SWITCH (NFC / IC) =====================
+let loanMode = 'nfc'; // 'nfc' or 'ic'
+
+function switchLoanTab(mode) {
+    loanMode = mode;
+    document.getElementById('loanTabNfc').className = 'tab-btn' + (mode==='nfc'?' active':'');
+    document.getElementById('loanTabIc').className = 'tab-btn' + (mode==='ic'?' active':'');
+    document.getElementById('loanNfcTab').style.display = mode==='nfc' ? '' : 'none';
+    document.getElementById('loanIcTab').style.display = mode==='ic' ? '' : 'none';
+    document.getElementById('loanNfcInfo').innerHTML = '';
+    if (mode==='ic') setTimeout(() => document.getElementById('loanIcSearch').focus(), 100);
+    else setTimeout(() => document.getElementById('loanNfc').focus(), 100);
+}
+
+async function loanCheckIc() {
+    const ic = document.getElementById('loanIcSearch').value.trim();
+    if (!ic) { showToast('Sila masukkan No. IC', 'warning'); return; }
+    document.getElementById('loanNfcInfo').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyemak...';
+    try {
+        const res = await apiPost('book_loan_check_ic', {ic_number:ic});
+        const data = await res.json();
+        if (data.success) {
+            const m = data.member;
+            loanNfcId = m.nfc_id || ('IC_' + ic);
+            loanMemberInfo = { name: m.name, ic_number: m.ic_number || ic, kelas: m.kelas || '', category: m.category };
+            document.getElementById('loanNfcInfo').innerHTML = `<span style="color:#059669"><strong><i class="fas fa-id-card"></i> ${m.name}</strong> (${m.category}) — ${data.via==='ic_only'?'Pinjaman tanpa kad ahli':'Kad ahli dikenali'} ✔</span>`;
+        } else {
+            loanNfcId = null; loanMemberInfo = null;
+            document.getElementById('loanNfcInfo').innerHTML = `<span style="color:red">${data.message}</span>`;
+        }
+    } catch(e) {
+        document.getElementById('loanNfcInfo').innerHTML = '<span style="color:red">Ralat sambungan</span>';
+    }
+}
+
+// Add Enter key for loanIcSearch
+document.addEventListener('DOMContentLoaded', function() {
+    const el = document.getElementById('loanIcSearch');
+    if (el) el.addEventListener('keydown', function(e) { if(e.key==='Enter'){e.preventDefault();loanCheckIc();} });
+});
+
+// ===================== EDIT INDIVIDU AHLI =====================
+// Source pool: cari ahli dalam mana-mana cache yang ada (bulk update / urus bertugas)
+function _findEditMember(id) {
+    const pools = [window._upMembersCache, window._bertugasCache];
+    for (const p of pools) {
+        if (Array.isArray(p)) {
+            const f = p.find(x => x.id === id);
+            if (f) return f;
+        }
+    }
+    return null;
+}
+
+function openEditMemberModal(id) {
+    const m = _findEditMember(id);
+    if (!m) { showToast('Data ahli tidak dijumpai dalam senarai', 'error'); return; }
+    window._editMemberSource = (window._bertugasCache || []).some(x => x.id === id) ? 'bertugas' : 'bulk';
+    document.getElementById('editMemberId').value = m.id;
+    document.getElementById('editMemberNfc').value = m.nfc_id || '';
+    document.getElementById('editMemberName').value = m.name || '';
+    // Bagi senarai bertugas, m.kelas sudah dinormalkan ('-' jika Guru/AKP). Jika '-' kosongkan.
+    let kelasVal = (m.kelas && m.kelas !== '-') ? m.kelas : '';
+    // Jika role asal (untuk bertugas) ialah kelas, gunakannya
+    if (!kelasVal && m.role && !['guru','akp'].includes(String(m.role).toLowerCase())) kelasVal = m.role;
+    document.getElementById('editMemberKelas').value = kelasVal;
+    document.getElementById('editMemberBatch').value = (m.batch && m.batch !== '-') ? m.batch : '';
+    const kelasUp = kelasVal.toUpperCase();
+    const courseMatch = kelasUp.match(/\b(ETN|ETE|MTK|MTA|BAK|BKP|PPU|MPI|CTP)\b/);
+    document.getElementById('editMemberCourse').value = courseMatch ? courseMatch[1] : '';
+    // Tentukan kategori/peranan: utamakan m.kategori (Pelajar/Guru/AKP) jika ada, else dari role
+    let kat = (m.kategori || '').toLowerCase();
+    if (!kat) {
+        const roleLow = String(m.role || m.category || '').toLowerCase();
+        kat = roleLow === 'guru' ? 'guru' : (roleLow === 'akp' ? 'akp' : 'pelajar');
+    }
+    document.getElementById('editMemberCategory').value = (kat === 'guru' ? 'guru' : (kat === 'akp' ? 'akp' : 'pelajar'));
+    openModal('editMemberModal');
+}
+
+async function submitEditMember() {
+    const id = parseInt(document.getElementById('editMemberId').value);
+    const nfc_id = document.getElementById('editMemberNfc').value.trim();
+    const name = document.getElementById('editMemberName').value.trim();
+    let kelas = document.getElementById('editMemberKelas').value.trim();
+    const course = document.getElementById('editMemberCourse').value.trim();
+    const batch = document.getElementById('editMemberBatch').value.trim();
+    const kat = document.getElementById('editMemberCategory').value; // pelajar/guru/akp
+    if (!name) { showToast('Nama wajib diisi', 'error'); return; }
+    if (!nfc_id) { showToast('UID/NFC wajib diisi', 'error'); return; }
+    // Tentukan nilai 'role' yang disimpan: Guru/AKP -> string literal; Pelajar -> nama kelas
+    let roleToSave = '';
+    if (kat === 'guru') roleToSave = 'Guru';
+    else if (kat === 'akp') roleToSave = 'AKP';
+    else {
+        if (course && kelas && !kelas.toUpperCase().includes(course.toUpperCase())) {
+            kelas = kelas + ' ' + course;
+        }
+        roleToSave = kelas;
+    }
+    // category dalam DB tidak ditukar (kekal 'ahli' / 'bertugas') — hantar kosong supaya COALESCE kekalkan
+    try {
+        const res = await apiPost('update_member_individual', { id, nfc_id, name, kelas: roleToSave, batch, category: '' });
+        const data = await res.json();
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) {
+            closeModal('editMemberModal');
+            if (window._editMemberSource === 'bertugas') loadBertugasList();
+            else loadBulkMembersByBatch();
+        }
+    } catch(e) { showToast('Ralat sambungan', 'error'); }
+}
+
+// ===================== URUS BERTUGAS =====================
+async function loadBertugasList() {
+    const body = document.getElementById('bertugasListBody');
+    if (!body) return;
+    body.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Memuatkan...</td></tr>';
+    try {
+        const res = await apiGet('bertugas_list', { token: adminToken });
+        const data = await res.json();
+        if (!data.success) {
+            body.innerHTML = `<tr><td colspan="9" class="empty-state">${data.message || 'Gagal memuatkan'}</td></tr>`;
+            return;
+        }
+        window._bertugasCache = data.members;
+        filterBertugasList();
+    } catch(e) {
+        body.innerHTML = '<tr><td colspan="9" class="empty-state">Ralat sambungan</td></tr>';
+    }
+}
+
+function filterBertugasList() {
+    const all = window._bertugasCache || [];
+    const q = (document.getElementById('bertugasSearchName').value || '').toLowerCase().trim();
+    const qb = (document.getElementById('bertugasFilterBatch').value || '').toLowerCase().trim();
+    const qk = (document.getElementById('bertugasFilterKelas').value || '').toLowerCase().trim();
+    const qc = (document.getElementById('bertugasFilterKategori').value || '').toLowerCase().trim();
+    const filtered = all.filter(m => {
+        if (q && !(m.name || '').toLowerCase().includes(q)) return false;
+        if (qb && !String(m.batch || '').toLowerCase().includes(qb)) return false;
+        if (qk && !String(m.kelas || '').toLowerCase().includes(qk)) return false;
+        if (qc && String(m.kategori || '').toLowerCase() !== qc) return false;
+        return true;
+    });
+    const body = document.getElementById('bertugasListBody');
+    const infoEl = document.getElementById('bertugasInfo');
+    if (infoEl) infoEl.innerHTML = `<i class="fas fa-users"></i> Memaparkan <b>${filtered.length}</b> daripada <b>${all.length}</b> pengawas bertugas`;
+    if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="9" class="empty-state">Tiada rekod sepadan</td></tr>';
+        return;
+    }
+    body.innerHTML = filtered.map((m, i) => `
+        <tr>
+            <td>${i+1}</td>
+            <td><b>${m.name}</b></td>
+            <td><code style="font-size:0.78rem">${m.nfc_id || '-'}</code></td>
+            <td>${m.batch || '-'}</td>
+            <td>${m.kelas || '-'}</td>
+            <td>${m.course || '-'}</td>
+            <td><span class="status-pill pill-blue">${m.kategori}</span></td>
+            <td><span class="status-pill" style="background:#e0f2fe;color:#0369a1">Pengawas Bertugas</span></td>
+            <td><button class="btn btn-warning btn-sm" onclick="openEditMemberModal(${m.id})"><i class="fas fa-pen"></i> Edit</button></td>
+        </tr>
+    `).join('');
+}
+
+
+// ===================== AUTO-DISMISS POPUP (IC NOT FOUND etc.) =====================
+function showAutoPopup(message, type, ms) {
+    type = type || 'error'; ms = ms || 2000;
+    let el = document.getElementById('autoPopupOverlay');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'autoPopupOverlay';
+        el.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:rgba(15,23,42,0.45);backdrop-filter:blur(4px);opacity:0;transition:opacity .2s';
+        el.innerHTML = '<div id="autoPopupBox" style="background:#fff;border-radius:18px;padding:28px 36px;box-shadow:0 20px 60px rgba(0,0,0,0.25);min-width:280px;max-width:90vw;text-align:center;transform:scale(.9);transition:transform .2s"><div id="autoPopupIcon" style="font-size:2.6rem;margin-bottom:10px"></div><div id="autoPopupMsg" style="font-size:1.05rem;font-weight:600;color:#1e293b"></div></div>';
+        document.body.appendChild(el);
+    }
+    const colors = { error:'#ef4444', success:'#10b981', warning:'#f59e0b', info:'#0ea5e9' };
+    const icons  = { error:'<i class="fas fa-circle-xmark"></i>', success:'<i class="fas fa-circle-check"></i>', warning:'<i class="fas fa-triangle-exclamation"></i>', info:'<i class="fas fa-info-circle"></i>' };
+    document.getElementById('autoPopupIcon').innerHTML = icons[type] || icons.info;
+    document.getElementById('autoPopupIcon').style.color = colors[type] || colors.info;
+    document.getElementById('autoPopupMsg').textContent = message;
+    requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        document.getElementById('autoPopupBox').style.transform = 'scale(1)';
+    });
+    clearTimeout(window._autoPopupTimer);
+    window._autoPopupTimer = setTimeout(() => {
+        el.style.opacity = '0';
+        document.getElementById('autoPopupBox').style.transform = 'scale(.9)';
+        setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 250);
+    }, ms);
+}
+
+// ===================== INIT =====================
+document.getElementById('current-year').innerText = new Date().getFullYear();
+loadLiveSessions();
+loadLeaderboard();
+loadBatchActivity();
+loadActiveLoans();
+loadTopBorrowers();
+setInterval(() => {
+    if (document.getElementById('page-scan').classList.contains('active')) {
+        loadLiveSessions();
+        loadLeaderboard();
+        loadBatchActivity();
+        loadActiveLoans();
+        loadTopBorrowers();
+    }
+}, 30000);
+</script>
+</body>
+</html>
